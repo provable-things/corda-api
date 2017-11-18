@@ -72,3 +72,4 @@ crashlytics-build.properties
 
 # docs related
 docs/virtualenv/
+/src/main/kotlin/it/oraclize/cordapi/flows/ProofFlow.kt
