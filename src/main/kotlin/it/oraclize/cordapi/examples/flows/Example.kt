@@ -23,7 +23,7 @@ object Example {
     @StartableByRPC
     class Initiator(val amount: Int) : FlowLogic<SignedTransaction>() {
         companion object {
-            object QUERYING_ORACLE : ProgressTracker.Step("Querying the Oracle")
+            object QUERYING_ORACLE : ProgressTracker.Step("Querying Oracle")
             object RESULTS_RECEIVED : ProgressTracker.Step("Results received")
             object PROOF: ProgressTracker.Step("Verifying verifyProof")
             object CREATING_TX : ProgressTracker.Step("Creating the transaction")
