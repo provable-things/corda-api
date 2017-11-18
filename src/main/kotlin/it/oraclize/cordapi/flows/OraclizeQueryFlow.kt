@@ -19,13 +19,12 @@ class OraclizeQueryFlow (val datasource: String, val query: String,
                          val delay: Int = 0, val proofType: Int = 0) : FlowLogic<Answer>() {
 
     companion object {
-        object QUERYING : ProgressTracker.Step("Querying Oraclize")
+
 
         @JvmStatic
         val console = loggerFor<OraclizeQueryFlow>()
     }
 
-    override val progressTracker = ProgressTracker(QUERYING)
 
     // start OraclizeQueryFlow datasource: "URL", query: "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP", delay: 0, proofType: 16
     @Suspendable
@@ -35,7 +34,6 @@ class OraclizeQueryFlow (val datasource: String, val query: String,
         val oraclize = serviceHub.identityService
                 .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
-        progressTracker.currentStep = QUERYING
         val session = initiateFlow(oraclize)
 
         val untrustedAnswer = session.sendAndReceive<Answer>(Query(datasource, query, delay, proofType))
