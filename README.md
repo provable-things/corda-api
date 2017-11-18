@@ -1,5 +1,7 @@
 ## Oraclize Corda-api repo
 
+**Note:** Clone with the `--recursive` flag
+
 #### Examples
 
 How to run the examples:
