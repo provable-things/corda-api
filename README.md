@@ -47,34 +47,27 @@ The transaction is depicted in the following figure:<br>
 <img src="docs/imgs/transaction.png" alt="Drawing" width="700"/>
 
 In this example, the following steps are performed:
-  
   1. A simply call to the `QueryFlow` provided by the Oraclize service is performed by the party interested in having the changing rate (in this example the party that calls `IssueCashFlow`):
   
-   ```kotlin
+```kotlin
      val answ = subFlow(
            Oraclize.QueryFlow("URL","json(http://api.fixer.io/latest?symbols=USD,GBP).rates.GBP")
        )
-   ```
+```
 
 In the statement above, only the `datasource` and the `query` fields are given, but other fields like the `delay` and the `proofType` could be specified.
   
 Therefore, the model of an Oraclize query is specified as follows:
-   
 <img src="docs/imgs/query-model.png" alt="Drawing" width="200"/>
-
 The tasks performed by the `QueryFlow` flow are depicted in the following diagram:
-   
 <img src="docs/imgs/sq-query.png"  width="800"/><br>
-
 Additionally, the `answ` variable is modeled by the following class:
-
 <img src="docs/imgs/answer-model.png" alt="Drawing" width="200"/>
-
-which specifies the `json` containing the results and eventually the relative Oraclize _authenticity proof_.<br>
-2. Once the answer has been received, an new `CashOwningState` is created and inserted in a issue command:
+which specifies the `json` containing the results and eventually the relative Oraclize _authenticity proof_.
+  2. Once the answer has been received, an new `CashOwningState` is created and inserted in a issue command:
 ```kotlin
-  val issueState = CashOwningState(amount, ourIdentity)
-  val issueCommand = Command(CashIssueContract.Commands.Issue(),
+     val issueState = CashOwningState(amount, ourIdentity)
+     val issueCommand = Command(CashIssueContract.Commands.Issue(),
                              issueState.participants.map { it.owningKey }
                      )
 ```
@@ -100,6 +93,7 @@ The `verify` function in the contract executes the following steps:
             }
   }
 ```
+
 3. A transaction is created by specifying the commands and the contract listed above
 4. Once the transaction is verified, all the required signers must sign the transactiona and this is achieved by the following steps:
    - A filtered transaction is created, by filtering out all the non-`Answer` commands 
