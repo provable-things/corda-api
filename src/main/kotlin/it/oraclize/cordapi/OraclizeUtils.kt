@@ -65,7 +65,7 @@ class OraclizeUtils {
             console.info(pathToBundle.toString())
 
             val nodeJS = NodeJS.createNodeJS()
-            val proofV8 = toV8TypedArray(nodeJS, proof as ByteArray)
+            val proofV8 = toV8TypedArray(nodeJS, proof)
             val proofVerifier = nodeJS.require(pathToBundle.toFile())
             var obj : V8Object? = null
 
@@ -85,6 +85,9 @@ class OraclizeUtils {
                 continue
 
             val mainProof = obj?.getObject("mainProof") as V8Object
+//            for (key in mainProof.keys) {
+//                console.info("$key : ${mainProof.get(key)}")
+//            }
             val isVerified = mainProof.getBoolean("isVerified")
 
             // TODO(make it more readable)

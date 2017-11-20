@@ -59,7 +59,7 @@ object Example {
 
             progressTracker.currentStep = PROOF
             val proofVerified = OraclizeUtils.verifyProof(answ.proof as ByteArray)
-
+            console.info("proof is $proofVerified")
 
             progressTracker.currentStep = CREATING_TX
             // States + commands + contract = raw transaction <- it can be modified
