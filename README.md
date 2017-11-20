@@ -1,5 +1,3 @@
-<img src="docs/imgs/corda-oraclize.png" alt="Drawing" height="100"/>
-
 ## Oraclize `corda-api` repo
 
 Clone this repository with the `--recursive` flag, due the presence of submodules.
@@ -50,17 +48,18 @@ The transaction is depicted in the following figure:<br>
 
 In this example, the following steps are performed:
   
-1. A simply call to the `QueryFlow` provided by the Oraclize service is performed by the party interested in having the changing rate (in this example the party that calls `IssueCashFlow`):
+  1. A simply call to the `QueryFlow` provided by the Oraclize service is performed by the party interested in having the changing rate (in this example the party that calls `IssueCashFlow`):
   
-```kotlin
-  val answ = subFlow(
-        Oraclize.QueryFlow("URL","json(http://api.fixer.io/latest?symbols=USD,GBP).rates.GBP")
-    )
-```
+   ```kotlin
+     val answ = subFlow(
+           Oraclize.QueryFlow("URL","json(http://api.fixer.io/latest?symbols=USD,GBP).rates.GBP")
+       )
+   ```
 
 In the statement above, only the `datasource` and the `query` fields are given, but other fields like the `delay` and the `proofType` could be specified.
   
-Therefore, the model of an Oraclize query is specified as follows:<br>
+Therefore, the model of an Oraclize query is specified as follows:
+   
 <img src="docs/imgs/query-model.png" alt="Drawing" width="200"/>
 
 The tasks performed by the `QueryFlow` flow are depicted in the following diagram:<br>
