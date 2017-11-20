@@ -62,7 +62,8 @@ Therefore, the model of an Oraclize query is specified as follows:
    
 <img src="docs/imgs/query-model.png" alt="Drawing" width="200"/>
 
-The tasks performed by the `QueryFlow` flow are depicted in the following diagram:<br>
+The tasks performed by the `QueryFlow` flow are depicted in the following diagram:
+   
 <img src="docs/imgs/sq-query.png"  width="800"/><br>
 
 Additionally, the `answ` variable is modeled by the following class:
