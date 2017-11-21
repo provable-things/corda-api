@@ -1,4 +1,4 @@
-## Oraclize `corda-api` repo
+# Oraclize `corda-api` repo
 
 Clone this repository with the `--recursive` flag, due the presence of submodules.
 
