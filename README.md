@@ -2,7 +2,7 @@
 
 Clone this repository with the `--recursive` flag, due the presence of submodules.
 
-#### Examples
+#### Execute the example
 
 How to run the examples:
 
@@ -18,9 +18,9 @@ In the **`crash`** shell:
 >>> run vaultQuery contractStateType: it.oraclize.cordapi.examples.states.CashOwningState
 ```
 
-#### Add this to your cordapp
+#### Want to use Oraclize?
 
-In the gradle put the following:
+Put the following lines into the `build.gradle` file:
 
 ```groovy
 repositories {
@@ -46,7 +46,7 @@ as described in the following picture:
 
 <img src="docs/imgs/transaction.png" alt="Drawing" width="700"/>
 
-The steps performed by the example follow are:
+The steps performed by the example are:
 
 **Step 1:** The `OraclizeQueryFlow` is called along with the following parameters:
   
@@ -59,18 +59,27 @@ The steps performed by the example follow are:
 val answ = subFlow(OraclizeQueryFlow(
         datasource = "URL",
         query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
+        delay = 0,
         proofType = 16)
     )
 ```
 
-`answ`  will contain the following fields:
+`answ` is an instance of the `Answer` class and it will contain the following fields:
 
-  * *query ID* as a string
-  * *result* as a string or a byte array
+  * *queryID* the query identification string
+  * *result* as a string or a byte array returned by the datasource
   * *proof* as a byte array
   * *type* of the result, defines the type of result given, `"str"` for `string`, `"hex"` for byte array
 
-**Step 2:** once the answer has been received, the state `CashOwningState` and the `Answer` are both inserted in a command:
+**Note:** `json(...)` is a parser implemented by our service to navigate in the json returned by the data source specified. For other parsers check [here](https://docs.oraclize.it/#general-concepts-parsing-helpers).
+
+**Optional step:** Verify the proof received:
+
+```kotlin
+require(OraclizeUtils.verifyProof(answ.proof as ByteArray))
+```
+
+**Step 2:** after the `CashOwningState` and the `Answer` are defined, each one is then inserted in a command:
 
 ```kotlin
 // The command which defines the fact of issuing cash
@@ -86,19 +95,14 @@ val oracle = serviceHub.identityService
 val answerCommand = Command(answ, oracle.owningKey)
 ```
 
-```kotlin
-
-```
-
-**Step 3:** The transaction is built and verify:
+**Step 3:** The transaction is built and verified:
 
 ```kotlin
 val txBuilder = TransactionBuilder(notary).withItems(
         StateAndContract(issueState, CashIssueContract.TEST_CONTRACT_ID),
         issueCommand, answerCommand)
 
-        progressTracker.currentStep = VERIFYING_TX
-        txBuilder.toLedgerTransaction(serviceHub).verify()
+txBuilder.toLedgerTransaction(serviceHub).verify()
 ```
 
 The `verify()` is defined as follows:
@@ -145,6 +149,9 @@ val fullySignedTx = serviceHub.signInitialTransaction(txBuilder)
 ```
 
 **Step 6:** Finalize the transaction with eventually some notary checking:
+
 ```kotlin
 return subFlow(FinalityFlow(fullySignedTx, FINALIZING_TX.childProgressTracker()))
 ```
+
+Once notary validation has been succeeded the transaction is inserted in the ledger.
