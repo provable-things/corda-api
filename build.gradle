@@ -30,6 +30,7 @@ repositories {
 apply plugin: 'kotlin'
 apply plugin: 'net.corda.plugins.cordformation'
 
+
 sourceSets {
     main {
         resources {
@@ -71,3 +72,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         javaParameters = true   // Useful for reflection.
     }
 }
+
+
+
+
