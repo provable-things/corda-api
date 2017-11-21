@@ -6,6 +6,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.utilities.ProgressTracker
+import net.corda.core.utilities.loggerFor
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -20,7 +21,8 @@ class ProofFlow() : FlowLogic<Unit>() {
     override fun call() {
         val proof = Files.readAllBytes(Paths.get("/Users/mauro/Desktop/proof.proof"))
 
-        OraclizeUtils.verifyProof(proof)
+        val value = OraclizeUtils.verifyProof(proof)
+        loggerFor<ProofFlow>().info("verifiedProof is ${value}")
         return Unit
     }
 }
