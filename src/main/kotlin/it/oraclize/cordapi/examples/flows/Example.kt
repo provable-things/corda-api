@@ -58,8 +58,7 @@ object Example {
             console.info("Answer received from Oraclize: \n $answ")
 
             progressTracker.currentStep = PROOF
-            val proofVerified = OraclizeUtils.verifyProof(answ.proof as ByteArray)
-            console.info("proof is $proofVerified")
+            require(OraclizeUtils.verifyProof(answ.proof as ByteArray))
 
             progressTracker.currentStep = CREATING_TX
             // States + commands + contract = raw transaction <- it can be modified
