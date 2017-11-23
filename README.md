@@ -1,6 +1,14 @@
-# Oraclize `corda-api` repo
+## Oraclize `corda-api` repo
 
 Clone this repository with the `--recursive` flag, due the presence of submodules.
+
+Once cloned, perform the following inside `src/main/resources/proof-verification-tool/`:
+
+```bash
+yarn install
+yarn build
+yarn browserify-node
+```
 
 #### Execute the example
 
@@ -18,7 +26,7 @@ In the **`crash`** shell:
 >>> run vaultQuery contractStateType: it.oraclize.cordapi.examples.states.CashOwningState
 ```
 
-#### Want to use Oraclize?
+#### Want to Oraclize?
 
 Put the following lines into the `build.gradle` file:
 
