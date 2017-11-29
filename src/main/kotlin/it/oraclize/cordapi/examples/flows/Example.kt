@@ -10,9 +10,7 @@ import it.oraclize.cordapi.flows.OraclizeQueryFlow
 import it.oraclize.cordapi.flows.OraclizeSignFlow
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndContract
-import net.corda.core.contracts.TransactionState
 import net.corda.core.flows.*
-import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -22,17 +20,6 @@ import java.util.function.Predicate
 
 
 object Example {
-//    @InitiatingFlow
-//    @StartableByRPC
-//    class KeyFlow() : FlowLogic<Unit>() {
-//        override val progressTracker = ProgressTracker(ProgressTracker.Step("Getting the key"))
-//
-//        @Suspendable
-//        override fun call() {
-//            Initiator.console.info("Owning Key:")
-//            Initiator.console.info(ourIdentity.owningKey.toBase58String())
-//        }
-//    }
 
     @InitiatingFlow
     @StartableByRPC
@@ -60,11 +47,7 @@ object Example {
 
             // Parties involved
             val oracle = serviceHub.identityService
-                    .wellKnownPartyFromX500Name(CordaX500Name(
-                            "Oraclize",
-                            "London",
-                            "GB"
-                    )) as Party
+                    .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
             val notary = serviceHub.networkMapCache.notaryIdentities.first()
 

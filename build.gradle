@@ -66,6 +66,10 @@ dependencies {
     compile "commons-codec:commons-codec:1.9"
 }
 
+//jar {
+//    baseName 'oraclize-corda-api'
+//}
+
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         languageVersion = "1.1"

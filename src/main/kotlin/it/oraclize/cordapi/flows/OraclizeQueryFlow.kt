@@ -26,7 +26,7 @@ class OraclizeQueryFlow (val datasource: String, val query: String,
     }
 
 
-    // start OraclizeQueryFlow datasource: "URL", query: "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP", delay: 0, proofType: 16
+    // start OraclizeQueryFlow datasource: "URL", query: "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP", delay: 0, proof_type: 16
     @Suspendable
     override fun call(): Answer {
         console.info("Called!")
