@@ -1,8 +1,13 @@
 ## Oraclize `corda-api` repo
 
 Clone this repository with the `--recursive` flag, due the presence of submodules.
+Download the submodule:
 
-Once cloned, perform the following inside `src/main/resources/proof-verification-tool/`:
+```bash
+git submodule update --init
+```
+
+Once cloned, go inside `libs/proof-verification-tool/` and build the tool:
 
 ```bash
 yarn install
@@ -10,7 +15,13 @@ yarn build
 yarn browserify-node
 ```
 
-#### Execute the example
+Then move the bundle into `resource` folder:
+
+```
+mv pvtBundle.js src/main/resources/proof-verification-tool
+```
+
+#### Execute the example locally
 
 How to run the examples:
 
@@ -24,6 +35,15 @@ In the **`crash`** shell:
 ```bash
 >>> start Example amount: 10
 >>> run vaultQuery contractStateType: it.oraclize.cordapi.examples.states.CashOwningState
+```
+
+#### Execute the example on TestNet:
+
+Run `deployNodes` as in the previous paragraph and then load the generated `oraclize-corda-api-x.x.jar` into the 
+plugins folder of your node on TestNet:
+
+```bash
+scp <host:port>:~/plugins/
 ```
 
 #### Want to Oraclize?

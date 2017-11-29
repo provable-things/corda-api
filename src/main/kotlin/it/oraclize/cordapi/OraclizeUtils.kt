@@ -43,7 +43,7 @@ class OraclizeUtils {
             if (!pathToBundle.toFile().exists()) {
 
                 val bundle = ClassLoader
-                        .getSystemResourceAsStream("proof-verification-tool/bundleNode.js")
+                        .getSystemResourceAsStream("bundleNode.js")
                         .bufferedReader()
 
                 val pw = PrintWriter(pathToBundle.toFile())

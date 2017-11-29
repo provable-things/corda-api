@@ -65,10 +65,8 @@ object Example {
                             "London",
                             "GB"
                     )) as Party
+
             val notary = serviceHub.networkMapCache.notaryIdentities.first()
-//            console.info(notary.name.toString())
-//            val notaryName = CordaX500Name("corda.notary.simple", "TestNet Notary","London", "GB")
-//            val notary = serviceHub.networkMapCache.getNotary(notaryName)!!
 
             progressTracker.currentStep = QUERYING_ORACLE
             progressTracker.currentStep = RESULTS_RECEIVED
