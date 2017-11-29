@@ -60,7 +60,11 @@ object Example {
 
             // Parties involved
             val oracle = serviceHub.identityService
-                    .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
+                    .wellKnownPartyFromX500Name(CordaX500Name(
+                            "Oraclize",
+                            "London",
+                            "GB"
+                    )) as Party
             val notary = serviceHub.networkMapCache.notaryIdentities.first()
 //            console.info(notary.name.toString())
 //            val notaryName = CordaX500Name("corda.notary.simple", "TestNet Notary","London", "GB")
@@ -73,8 +77,6 @@ object Example {
                     query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
                     proofType = 16)
             )
-
-
 
             console.info("Answer received from Oraclize: \n $answ")
 
