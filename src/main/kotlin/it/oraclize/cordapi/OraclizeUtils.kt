@@ -1,6 +1,7 @@
 package it.oraclize.cordapi
 
 import com.eclipsesource.v8.*
+import com.eclipsesource.v8.utils.MemoryManager
 import net.corda.core.flows.FlowException
 
 import net.corda.core.identity.CordaX500Name
@@ -18,24 +19,21 @@ class OraclizeUtils {
         val console = loggerFor<OraclizeUtils>()
 
         @JvmStatic
-        private fun toV8TypedArray(nodeJS: NodeJS, proof: ByteArray) : V8TypedArray {
+        fun getNodeName() = CordaX500Name(
+                "Oraclize",
+                "London",
+                "GB"
+        )
+    }
 
-            var proofArray : V8ArrayBuffer? = null
+    class ProofVerificationTool : AutoCloseable {
+        private var initiated = false
+        private lateinit var nodeJS: NodeJS
+        private lateinit var proofVerificationToolModule: V8Object
+        private lateinit var callback : V8Function
+        private var returnedObj: V8Object? = null
 
-            try {
-                val proofBB = ByteBuffer.allocateDirect(proof.size)
-                proofBB.put(proof)
-
-                proofArray = V8ArrayBuffer(nodeJS.runtime, proofBB)
-
-                return V8TypedArray(nodeJS.runtime, proofArray,
-                        V8Value.UNSIGNED_INT_8_ARRAY, 0, proof.size)
-            } finally {
-                proofArray?.release()
-            }
-        }
-
-        @JvmStatic private fun setBundleFile() : Path {
+        private fun setBundleFile() : Path {
             val pathToBundle = Paths.get(".")
                     .toAbsolutePath()
                     .resolve("pvtBundle.js")
@@ -60,71 +58,24 @@ class OraclizeUtils {
             return pathToBundle
         }
 
+        private fun toV8TypedArray(nodeJS: NodeJS, proof: ByteArray) : V8TypedArray {
 
-        @JvmStatic private fun proofVerificationTool(proof: ByteArray) : Boolean {
+            var proofArray : V8ArrayBuffer? = null
 
-            val pathToBundle = setBundleFile()
-            console.info(pathToBundle.toString())
+            try {
+                val proofBB = ByteBuffer.allocateDirect(proof.size)
+                proofBB.put(proof)
 
-            val nodeJS = NodeJS.createNodeJS()
-            val proofV8 = toV8TypedArray(nodeJS, proof)
-            val proofVerifier = nodeJS.require(pathToBundle.toFile())
-            var obj : V8Object? = null
+                proofArray = V8ArrayBuffer(nodeJS.runtime, proofBB)
 
-            val callback = V8Function(nodeJS.runtime,
-                    { _, parameters: V8Array? -> obj = parameters?.getObject(0); Unit }
-            )
-
-            // You must release the obj returned
-            val tmp = proofVerifier.executeJSFunction("verifyProof", proofV8, callback) as V8Object
-
-            while (nodeJS.isRunning) {
-                nodeJS.handleMessage()
+                return V8TypedArray(nodeJS.runtime, proofArray,
+                        V8Value.UNSIGNED_INT_8_ARRAY, 0, proof.size)
+            } finally {
+                proofArray?.release()
             }
-
-            // Loop until the object returned has been set
-            while (obj == null)
-                continue
-
-            val mainProof = obj?.getObject("mainProof") as V8Object
-
-            val isVerified = mainProof.getBoolean("isVerified")
-
-            mainProof.release()
-            obj?.release()
-            tmp.release()
-            callback.release()
-            proofVerifier.release()
-            proofV8.release()
-            nodeJS.release()
-
-            return isVerified
         }
 
-        @JvmStatic
-        fun verifyProof(proof: ByteArray?) : Boolean {
-            if (proof != null)
-                return proofVerificationTool(proof)
-            else
-                throw FlowException("Proof is null")
-        }
-
-        @JvmStatic
-        fun getNodeName() = CordaX500Name(
-                "Oraclize",
-                "London",
-                "GB"
-        )
-    }
-
-    class ProofVerificationTool : Closeable {
-        private var initiated = false
-        private lateinit var nodeJS: NodeJS
-        private lateinit var proofVerificationToolModule: V8Object
-        private lateinit var callback : V8Function
-        private var returnedObj: V8Object? = null
-
-        fun init() {
+        private fun init() {
             if (!initiated) {
                 // Check if the bundle exists, otherwise it'll save it to disk
                 val pathToBundle = setBundleFile()
@@ -139,8 +90,6 @@ class OraclizeUtils {
                 )
 
                 initiated = true
-
-                loggerFor<ProofVerificationTool>().info("initiated")
             }
         }
 
@@ -148,6 +97,8 @@ class OraclizeUtils {
             if (!initiated) {
                 init()
             }
+            // Release all the resources automatically
+            val memV8 = MemoryManager(nodeJS.runtime)
 
             // Converts the proof into a valid V8 byte array
             val proofV8 = toV8TypedArray(nodeJS, proof)
@@ -163,7 +114,6 @@ class OraclizeUtils {
                 nodeJS.handleMessage()
             } while (nodeJS.isRunning)
 
-
             // Wait for the callback's result
             while (returnedObj == null)
                 continue
@@ -173,11 +123,12 @@ class OraclizeUtils {
             val isVerified = mainProof.getBoolean("isVerified")
 
 
-            mainProof.release()
-            returnedObj?.release()
-            returnedObj = null
-            tmp.release()
-            proofV8.release()
+            memV8.release()
+//            mainProof.release()
+//            returnedObj?.release()
+//            returnedObj = null
+//            tmp.release()
+//            proofV8.release()
 
             return isVerified
         }

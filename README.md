@@ -104,7 +104,9 @@ val answ = subFlow(OraclizeQueryFlow(
 **Optional step:** Verify the proof received:
 
 ```kotlin
-require(OraclizeUtils.verifyProof(answ.proof as ByteArray))
+OraclizeUtils.ProofVerificationTool().use {
+    require(it.verifyProof(answ.proof as ByteArray))
+}
 ```
 
 **Step 2:** after the `CashOwningState` and the `Answer` are defined, each one is then inserted in a command:
@@ -114,12 +116,12 @@ require(OraclizeUtils.verifyProof(answ.proof as ByteArray))
 val issueState = CashOwningState(amount, ourIdentity)
 // The command wrapping our Oraclize's answer
 val issueCommand = Command(
-                        CashIssueContract.Commands.Issue(),
-                        issueState.participants.map { it.owningKey }
-                   )
+    CashIssueContract.Commands.Issue(),
+    issueState.participants.map { it.owningKey }
+)
 // Get Oraclize's node
 val oracle = serviceHub.identityService
-            .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
+    .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 val answerCommand = Command(answ, oracle.owningKey)
 ```
 

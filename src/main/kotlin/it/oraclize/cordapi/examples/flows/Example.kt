@@ -62,7 +62,9 @@ object Example {
             console.info("Answer received from Oraclize: \n $answ")
 
             progressTracker.currentStep = PROOF
-            require(OraclizeUtils.verifyProof(answ.proof as ByteArray))
+            OraclizeUtils.ProofVerificationTool().use {
+                require(it.verifyProof(answ.proof as ByteArray))
+            }
 
             progressTracker.currentStep = CREATING_TX
             // States + commands + contract = raw transaction <- it can be modified
