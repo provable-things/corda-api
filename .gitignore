@@ -75,6 +75,4 @@ docs/virtualenv/
 *.html
 
 # Src not included
-/src/main/kotlin/it/oraclize/cordapi/flows/ProofFlow.kt
-
 /src/main/resources/bundleNode.js
