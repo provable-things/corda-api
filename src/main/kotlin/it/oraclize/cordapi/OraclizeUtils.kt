@@ -159,13 +159,10 @@ class OraclizeUtils {
             // Must be done in this way, because when the loop is done
             // isRunning will be set to false, and will remain false until
             // NodeJS.createNodeJS() is called or handleMessage is called
-//            do {
-//                nodeJS.handleMessage()
-//            } while (nodeJS.isRunning)
-
-            while(nodeJS.isRunning) {
+            do {
                 nodeJS.handleMessage()
-            }
+            } while (nodeJS.isRunning)
+
 
             // Wait for the callback's result
             while (returnedObj == null)
