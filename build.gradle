@@ -59,9 +59,11 @@ dependencies {
 
     testCompile "net.corda:corda-node-driver:$corda_release_version"
 
+    // Proof-verification-tool dependency
+    // This upgrades the NodeJS version to 7.4.0
+    compile files('libs/j2v8_macos_x86_64-4.8.0-SNAPSHOT.jar')
+
     // Cordapp dependencies
-    compile "com.eclipsesource.j2v8:j2v8_macosx_x86_64:4.6.0"
-//    compile 'com.eclipsesource.j2v8:j2v8_linux_x86_64:4.8.0'
     compile "org.apache.commons:commons-lang3:3.0"
     compile "commons-codec:commons-codec:1.9"
 }

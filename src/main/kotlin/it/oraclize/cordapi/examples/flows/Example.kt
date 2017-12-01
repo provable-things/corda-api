@@ -62,6 +62,7 @@ object Example {
             console.info("Answer received from Oraclize: \n $answ")
 
             progressTracker.currentStep = PROOF
+            val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
             OraclizeUtils.ProofVerificationTool().use {
                 require(it.verifyProof(answ.proof as ByteArray))
             }

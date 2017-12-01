@@ -52,7 +52,7 @@ class OraclizeUtils {
                         it.println(line)
                 }
 
-                console.info("File pvtBundle.js has been written on disk.")
+                console.info("Proof-verification-tool stored.")
             }
 
             return pathToBundle
@@ -94,10 +94,8 @@ class OraclizeUtils {
         }
 
         fun verifyProof(proof: ByteArray) : Boolean {
-            if (!initiated) {
-                init()
-            }
-            // Release all the resources automatically
+            init()
+
             val memV8 = MemoryManager(nodeJS.runtime)
 
             // Converts the proof into a valid V8 byte array
@@ -122,13 +120,8 @@ class OraclizeUtils {
             val mainProof = returnedObj?.getObject("mainProof") as V8Object
             val isVerified = mainProof.getBoolean("isVerified")
 
-
+            // Release the resources
             memV8.release()
-//            mainProof.release()
-//            returnedObj?.release()
-//            returnedObj = null
-//            tmp.release()
-//            proofV8.release()
 
             return isVerified
         }
@@ -142,4 +135,69 @@ class OraclizeUtils {
             }
         }
     }
+
+//    class ProofVerificationTool private constructor() : AutoCloseable {
+//        companion object {
+//            @JvmStatic private var initialized = false
+//            @JvmStatic private lateinit var nodeJS : NodeJS
+//            @JvmStatic private lateinit var proofVerificationToolModule : V8Object
+//            @JvmStatic private lateinit var instance : ProofVerificationTool
+//
+//            @JvmStatic private fun setBundleFile() : Path {
+//                val pathToBundle = Paths.get(".")
+//                        .toAbsolutePath()
+//                        .resolve("pvtBundle.js")
+//                        .normalize()
+//
+//                if (!pathToBundle.toFile().exists()) {
+//
+//                    val bundle = ClassLoader
+//                            .getSystemResourceAsStream("bundleNode.js")
+//                            .bufferedReader()
+//
+//                    val pw = PrintWriter(pathToBundle.toFile())
+//
+//                    pw.use {
+//                        for (line in bundle.readLines())
+//                            it.println(line)
+//                    }
+//
+//                    console.info("File pvtBundle.js has been written on disk.")
+//                }
+//
+//                return pathToBundle
+//            }
+//
+//
+//            @JvmStatic fun create() : ProofVerificationTool {
+//                if (!initialized) {
+//                    instance = ProofVerificationTool()
+//                }
+//
+//                return instance
+//            }
+//
+//            @JvmStatic fun verifyProof() : Boolean {
+//                return true
+//            }
+//
+//            @JvmStatic fun releaseResources() {
+//                if (initialized) {
+//                    proofVerificationToolModule.release()
+//                    nodeJS.release()
+//                }
+//
+//            }
+//        }
+//
+//        init {
+//            nodeJS = NodeJS.createNodeJS()
+//            proofVerificationToolModule = nodeJS.require(setBundleFile().toFile())
+//            initialized = true
+//        }
+//
+//        override fun close() {
+//            releaseResources()
+//        }
+//    }
 }
