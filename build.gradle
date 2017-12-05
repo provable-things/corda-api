@@ -67,7 +67,8 @@ dependencies {
 }
 
 jar {
-    baseName 'oraclize-corda-api'
+    baseName project.property('name')
+    version project.property('version')
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
