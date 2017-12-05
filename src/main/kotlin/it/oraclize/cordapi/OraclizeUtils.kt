@@ -115,18 +115,6 @@ class OraclizeUtils {
         }
 
         fun verifyProof(proof: ByteArray) : Boolean { return verify(proof) }
-
-//        fun close() {
-//            if (initiated) {
-//
-//                callback.release()
-//                proofVerificationToolModule.release()
-//                nodeJS.release()
-//                initiated = false
-//                loggerFor<ProofVerificationTool>().info("resources released")
-//            }
-//        }
-
     }
 
 }

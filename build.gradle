@@ -41,7 +41,6 @@ sourceSets {
     }
 }
 
-
 // Function to compile the J2V8 dependency
 def j2v8_dependency(architecture) {
     // Mapping for each different architecture given
@@ -58,7 +57,6 @@ def j2v8_dependency(architecture) {
 
     return j2v8_dep
 }
-
 
 import static org.apache.tools.ant.taskdefs.condition.Os.*
 dependencies {
@@ -80,7 +78,6 @@ dependencies {
 
     // Checking the current os
     if (project.hasProperty('os')) {
-
         compile j2v8_dependency(os)
     } else {
         if (isFamily(FAMILY_WINDOWS)) {
@@ -109,30 +106,6 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         jvmTarget = "1.8"
         javaParameters = true   // Useful for reflection.
     }
-}
-
-
-task osInfo {
-    description 'Show information about the operating system'
-    doLast {
-        println "Family:       ${OS_NAME}"
-        println "Version:      ${OS_VERSION}"
-        println "Architecture: ${OS_ARCH}"
-
-        if (isFamily(FAMILY_MAC)) {
-            println "Mac"
-            println "$os"
-        }
-        if (isFamily(FAMILY_UNIX)) {
-            println "unix"
-        }
-        if (isFamily(FAMILY_WINDOWS)) {
-            println "windows"
-        }
-
-    }
-
-
 }
 
 
