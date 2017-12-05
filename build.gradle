@@ -67,7 +67,7 @@ dependencies {
 }
 
 jar {
-    baseName project.property('name')
+    baseName 'oraclize-corda-api'
     version project.property('version')
 }
 
