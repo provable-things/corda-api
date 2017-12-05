@@ -101,7 +101,7 @@ class OraclizeUtils {
             val proofV8 = toV8TypedArray(nodeJS, proof)
 
             // verifyProof call
-            val tmp = proofVerificationToolModule
+            proofVerificationToolModule
                     .executeJSFunction("verifyProof", proofV8, callback) as V8Object
 
             // Must be done in this way, because when the loop is done

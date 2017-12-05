@@ -21,21 +21,15 @@ Then move the bundle into `resource` folder:
 mv pvtBundle.js src/main/resources/proof-verification-tool
 ```
 
-#### Execute the example locally
-
-How to run the examples:
+#### Build the project
 
 ```bash
-gradle deployNodes
-./buid/nodes/runnodes
-```
-
-In the **`crash`** shell:
-
-```bash
->>> start Example amount: 10
->>> run vaultQuery contractStateType: it.oraclize.cordapi.examples.states.CashOwningState
-```
+$ gradlew build [-Pos=[mac,windows,linux]]
+``` 
+`-Pos` specify the architecture you want to build against to. This is useful if you want 
+to export the jar produced in a machine with a different operating system. 
+If the `-Pos` argument is not given, the local architecture is automatically detected as well as the relative 
+J2V8 dependency. 
 
 #### Execute the example on TestNet:
 
@@ -46,9 +40,21 @@ plugins folder of your node on TestNet:
 scp <host:port>:~/plugins/
 ```
 
-#### Want to Oraclize?
+Run the jar and type in the **`crash`** shell the following:
 
-Put the following lines into the `build.gradle` file:
+```bash
+>>> start Example amount: 10
+```
+
+If you want to check the transaction stored, type:
+
+```bash
+>>> run vaultQuery contractStateType: it.oraclize.cordapi.examples.states.CashOwningState
+```
+
+#### Want to use Oraclize as a dependency?
+
+Say no more, put the following lines into the `build.gradle` file:
 
 ```groovy
 repositories {
