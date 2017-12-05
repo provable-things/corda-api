@@ -26,7 +26,7 @@ class OraclizeUtils {
         )
     }
 
-    class ProofVerificationTool : AutoCloseable {
+    class ProofVerificationTool {
         private var initiated = false
         private lateinit var nodeJS: NodeJS
         private lateinit var proofVerificationToolModule: V8Object
@@ -131,13 +131,19 @@ class OraclizeUtils {
             return verify(proof)
         }
 
-        override fun close() {
+        fun close() {
             if (initiated) {
+
                 callback.release()
                 proofVerificationToolModule.release()
                 nodeJS.release()
                 initiated = false
+                loggerFor<ProofVerificationTool>().info("resources released")
             }
         }
+
+        protected fun finalize() { close() }
+
     }
+
 }

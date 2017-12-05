@@ -63,9 +63,11 @@ object Example {
 
             progressTracker.currentStep = PROOF
 //            val proofVerificationTool = OraclizeUtils.ProofVerificationTool() // must be closed
-            OraclizeUtils.ProofVerificationTool().use {
-                require(it.verifyProof(answ.proof as ByteArray))
-            } // Releases automatically the resources
+//            OraclizeUtils.ProofVerificationTool().use {
+//                require(it.verifyProof(answ.proof as ByteArray))
+//            } // Releases automatically the resources
+            val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
+            proofVerificationTool.verifyProof(answ.proof as ByteArray)
 
             progressTracker.currentStep = CREATING_TX
             // States + commands + contract = raw transaction <- it can be modified

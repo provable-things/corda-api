@@ -39,9 +39,9 @@ open class CashIssueContract : Contract {
 
             val rate = answCmd.value.result as String
             "The rate USD/GBP must be over $USD_GBP_RATE_THRESH" using (rate.toDouble() > USD_GBP_RATE_THRESH)
-            "Oraclize's proof verification failed" using  (OraclizeUtils.ProofVerificationTool().use {
-                it.verifyProof(answCmd.value.proof as ByteArray)
-            })
+            val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
+            "Oraclize's proof verification failed" using  (
+                    proofVerificationTool.verifyProof(answCmd.value.proof as ByteArray))
         }
     }
 }
