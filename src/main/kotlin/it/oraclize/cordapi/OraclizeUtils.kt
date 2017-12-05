@@ -27,11 +27,7 @@ class OraclizeUtils {
     }
 
     class ProofVerificationTool {
-        private var initiated = false
-        private lateinit var nodeJS: NodeJS
-        private lateinit var proofVerificationToolModule: V8Object
-        private lateinit var callback : V8Function
-        private var returnedObj: V8Object? = null
+
 
         private fun setBundleFile() : Path {
             val pathToBundle = Paths.get(".")
@@ -75,32 +71,25 @@ class OraclizeUtils {
             }
         }
 
-        private fun init() {
-            if (!initiated) {
-                // Check if the bundle exists, otherwise it'll save it to disk
-                val pathToBundle = setBundleFile()
-
-                // Create node environment
-                nodeJS = NodeJS.createNodeJS()
-                proofVerificationToolModule = nodeJS.require(pathToBundle.toFile())
-
-                // Set the callback called by the verifyProof function
-                callback = V8Function(nodeJS.runtime,
-                        { _, parameters: V8Array? -> returnedObj = parameters?.getObject(0); Unit }
-                )
-
-                initiated = true
-            }
-        }
-
         private fun verify(proof: ByteArray) : Boolean {
 
+            // Check if the bundle exists, otherwise it'll save it to disk
+            val pathToBundle = setBundleFile()
+
+            // Loading the module, preparing the required objects
+            val nodeJS = NodeJS.createNodeJS()
             val memV8 = MemoryManager(nodeJS.runtime)
+            val proofVerificationToolModule = nodeJS.require(pathToBundle.toFile())
+
+            var v8Object : V8Object? = null
+            val callback = V8Function(nodeJS.runtime,
+                    { _, parameters: V8Array? -> v8Object = parameters?.getObject(0); Unit }
+            )
 
             // Converts the proof into a valid V8 byte array
             val proofV8 = toV8TypedArray(nodeJS, proof)
 
-            // verifyProof call
+            // js verifyProof call
             proofVerificationToolModule
                     .executeJSFunction("verifyProof", proofV8, callback) as V8Object
 
@@ -112,37 +101,31 @@ class OraclizeUtils {
             } while (nodeJS.isRunning)
 
             // Wait for the callback's result
-            while (returnedObj == null)
+            while (v8Object == null)
                 continue
 
             // Explore the object returned
-            val mainProof = returnedObj?.getObject("mainProof") as V8Object
+            val mainProof = v8Object?.getObject("mainProof") as V8Object
             val isVerified = mainProof.getBoolean("isVerified")
 
-            // Release the resources
+            // Release resources
             memV8.release()
 
             return isVerified
         }
 
-        fun verifyProof(proof: ByteArray) : Boolean {
-            init()
+        fun verifyProof(proof: ByteArray) : Boolean { return verify(proof) }
 
-            return verify(proof)
-        }
-
-        fun close() {
-            if (initiated) {
-
-                callback.release()
-                proofVerificationToolModule.release()
-                nodeJS.release()
-                initiated = false
-                loggerFor<ProofVerificationTool>().info("resources released")
-            }
-        }
-
-        protected fun finalize() { close() }
+//        fun close() {
+//            if (initiated) {
+//
+//                callback.release()
+//                proofVerificationToolModule.release()
+//                nodeJS.release()
+//                initiated = false
+//                loggerFor<ProofVerificationTool>().info("resources released")
+//            }
+//        }
 
     }
 
