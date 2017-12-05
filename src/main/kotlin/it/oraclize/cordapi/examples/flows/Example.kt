@@ -62,10 +62,10 @@ object Example {
             console.info("Answer received from Oraclize: \n $answ")
 
             progressTracker.currentStep = PROOF
-            val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
+//            val proofVerificationTool = OraclizeUtils.ProofVerificationTool() // must be closed
             OraclizeUtils.ProofVerificationTool().use {
                 require(it.verifyProof(answ.proof as ByteArray))
-            }
+            } // Releases automatically the resources
 
             progressTracker.currentStep = CREATING_TX
             // States + commands + contract = raw transaction <- it can be modified
