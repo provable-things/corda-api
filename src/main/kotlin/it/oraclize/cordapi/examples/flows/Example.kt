@@ -56,16 +56,12 @@ object Example {
             val answ = subFlow(OraclizeQueryFlow(
                     datasource = "URL",
                     query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
-                    proofType = 16)
-            )
+                    proofType = 16
+            ))
 
             console.info("Answer received from Oraclize: \n $answ")
 
             progressTracker.currentStep = PROOF
-//            val proofVerificationTool = OraclizeUtils.ProofVerificationTool() // must be closed
-//            OraclizeUtils.ProofVerificationTool().use {
-//                require(it.verifyProof(answ.proof as ByteArray))
-//            } // Releases automatically the resources
             val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
             proofVerificationTool.verifyProof(answ.proof as ByteArray)
 
