@@ -32,8 +32,7 @@ class OraclizeQueryFlow (val datasource: String, val query: String, val proofTyp
     // start OraclizeQueryFlow datasource: identity, query: hello, proofType: 0, delay: 0
     @Suspendable
     override fun call(): Answer {
-        console.info("Called!")
-
+        console.info("Called")
         val oraclize = serviceHub.identityService
                 .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
