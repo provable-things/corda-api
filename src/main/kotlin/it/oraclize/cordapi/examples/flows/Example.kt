@@ -23,7 +23,7 @@ object Example {
 
     @InitiatingFlow
     @StartableByRPC
-    class Initiator(val amount: Int) : FlowLogic<SignedTransaction>() {
+    class Initiator(val amount: Int) : FlowLogic<Unit>() {
         companion object {
             object QUERYING_ORACLE : ProgressTracker.Step("Sending query to Oraclize")
             object RESULTS_RECEIVED : ProgressTracker.Step("Waiting for the result from Oraclize")
@@ -43,7 +43,7 @@ object Example {
                 CREATING_TX, VERIFYING_TX, GATHERING_SIGNS, FINALIZING_TX)
 
         @Suspendable
-        override fun call(): SignedTransaction {
+        override fun call(): Unit {
 
             // Parties involved
             val oracle = serviceHub.identityService
@@ -53,49 +53,14 @@ object Example {
 
             progressTracker.currentStep = QUERYING_ORACLE
             progressTracker.currentStep = RESULTS_RECEIVED
-            val answ = subFlow(OraclizeQueryFlow(
+            val queryID = subFlow(OraclizeQueryFlow(
                     datasource = "URL",
                     query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
                     proofType = 16
             ))
 
-            console.info("Answer received from Oraclize: \n $answ")
+            console.info("QueryID : $queryID")
 
-            progressTracker.currentStep = PROOF
-            val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
-            proofVerificationTool.verifyProof(answ.proof as ByteArray)
-
-            progressTracker.currentStep = CREATING_TX
-            // States + commands + contract = raw transaction <- it can be modified
-            val issueState = CashOwningState(amount, ourIdentity)
-            val issueCommand = Command(CashIssueContract.Commands.Issue(),
-                    issueState.participants.map { it.owningKey })
-            val answerCommand = Command(answ, oracle.owningKey)
-            val txBuilder = TransactionBuilder(notary).withItems(
-                    StateAndContract(issueState, CashIssueContract.TEST_CONTRACT_ID),
-                    issueCommand, answerCommand)
-
-            progressTracker.currentStep = VERIFYING_TX
-            txBuilder.toLedgerTransaction(serviceHub).verify() // <- it cannot be modified
-
-            // Give to the oracle only the appropriate
-            // commands inside the tx
-            fun filtering(elem: Any): Boolean {
-                return when (elem) {
-                    is Command<*> -> oracle.owningKey in elem.signers && elem.value is Answer
-                    else -> false
-                }
-            }
-
-            progressTracker.currentStep = GATHERING_SIGNS
-            val ftx = txBuilder.toWireTransaction(serviceHub).buildFilteredTransaction(Predicate { filtering(it) })
-
-            val fullySignedTx = serviceHub.signInitialTransaction(txBuilder)
-                    .withAdditionalSignature(subFlow(OraclizeSignFlow(ftx)))
-
-            progressTracker.currentStep = FINALIZING_TX
-            // Catch also the notary signature and further verifications
-            return subFlow(FinalityFlow(fullySignedTx, FINALIZING_TX.childProgressTracker()))
         }
     }
 
