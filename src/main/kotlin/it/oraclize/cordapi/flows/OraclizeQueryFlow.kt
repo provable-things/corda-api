@@ -18,24 +18,27 @@ import net.corda.core.utilities.unwrap
 @StartableByRPC
 class OraclizeQueryFlow (val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<String>() {
 
-    override val progressTracker: ProgressTracker?
-        get() = ProgressTracker(
-                ProgressTracker.Step("OraclizeQueryFlow")
-        )
-
     companion object {
+
+        object PROCESSING : ProgressTracker.Step("Submitting the query.")
+
+        @JvmStatic
+        fun tracker() = ProgressTracker(PROCESSING)
+
         @JvmStatic
         val console = loggerFor<OraclizeQueryFlow>()
     }
 
+    override val progressTracker = tracker()
 
-    // start OraclizeQueryFlow datasource: "URL", query: "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP", delay: 0, proof_type: 16
+    // start OraclizeQueryFlow datasource: "URL", query: "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP", proofType: 16, delay: 0
     // start OraclizeQueryFlow datasource: identity, query: hello, proofType: 0, delay: 0
     @Suspendable
     override fun call(): String {
         val oraclize = serviceHub.identityService
                 .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
+        progressTracker.currentStep = PROCESSING
         val session = initiateFlow(oraclize)
 
         val untrustedString = session.sendAndReceive<String>(Query(datasource, query, delay, proofType))

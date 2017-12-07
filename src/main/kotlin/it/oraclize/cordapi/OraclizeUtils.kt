@@ -1,8 +1,11 @@
 package it.oraclize.cordapi
 
+import co.paralleluniverse.fibers.Fiber
 import com.eclipsesource.v8.*
 import com.eclipsesource.v8.utils.MemoryManager
+import it.oraclize.cordapi.flows.OraclizeQueryStatusFlow
 import net.corda.core.flows.FlowException
+import net.corda.core.flows.FlowLogic
 
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.loggerFor

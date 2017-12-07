@@ -1,25 +1,28 @@
 package it.oraclize.cordapi.flows
 
+import it.oraclize.cordapi.OraclizeUtils
 import it.oraclize.cordapi.entities.Answer
-import net.corda.core.flows.FlowLogic
+import it.oraclize.cordapi.entities.Query
+
+import co.paralleluniverse.fibers.Suspendable
+
 import net.corda.core.flows.InitiatingFlow
-import net.corda.core.utilities.ProgressTracker
-import net.corda.core.utilities.loggerFor
+import net.corda.core.flows.FlowLogic
+import net.corda.core.identity.Party
+import net.corda.core.utilities.unwrap
 
 @InitiatingFlow
-class OraclizeQueryResultFlow (val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<Answer>() {
+class OraclizeQueryResultFlow (val queryId : String) : FlowLogic<Answer>() {
 
-    override val progressTracker: ProgressTracker?
-        get() = ProgressTracker(
-                ProgressTracker.Step("OraclizeQueryResultFlow")
-        )
-
-    companion object {
-        @JvmStatic
-        val console = loggerFor<OraclizeQueryResultFlow>()
-    }
-
+    @Suspendable
     override fun call(): Answer {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val oraclize = serviceHub.identityService
+                .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
+
+        val session = initiateFlow(oraclize)
+
+        val untrustedAnswer = session.sendAndReceive<Answer>(queryId)
+
+        return untrustedAnswer.unwrap { answer -> answer }
     }
 }

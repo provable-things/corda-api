@@ -1,24 +1,25 @@
 package it.oraclize.cordapi.flows
 
+import co.paralleluniverse.fibers.Suspendable
+import it.oraclize.cordapi.OraclizeUtils
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
-import net.corda.core.utilities.ProgressTracker
+import net.corda.core.identity.Party
 import net.corda.core.utilities.loggerFor
+import net.corda.core.utilities.unwrap
 
 @InitiatingFlow
-class OraclizeQueryStatusFlow (val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<Boolean>() {
+class OraclizeQueryStatusFlow (val queryId: String) : FlowLogic<Boolean>() {
 
-    override val progressTracker: ProgressTracker?
-        get() = ProgressTracker(
-                ProgressTracker.Step("OraclizeQueryStatusFlow")
-        )
-
-    companion object {
-        @JvmStatic
-        val console = loggerFor<OraclizeQueryStatusFlow>()
-    }
-
+    @Suspendable
     override fun call(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val oraclize = serviceHub.identityService
+                .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
+
+        val session = initiateFlow(oraclize)
+
+        val untrustedStatus = session.sendAndReceive<Boolean>(queryId)
+
+        return untrustedStatus.unwrap { status -> status }
     }
 }
