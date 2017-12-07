@@ -24,9 +24,9 @@ mv pvtBundle.js src/main/resources/proof-verification-tool
 #### Build the project
 
 ```bash
-$ gradlew build [-Pos=[mac,windows,linux]]
+gradlew build [-Pos=[mac,windows,linux]]
 ``` 
-`-Pos` specify the architecture you want to build against to. This is useful if you want 
+`-Pos` is optional and specify the architecture you want to build against to. This is useful if you want
 to export the jar produced in a machine with a different operating system. 
 If the `-Pos` argument is not given, the local architecture is automatically detected as well as the relative 
 J2V8 dependency. 
@@ -37,7 +37,7 @@ Run `deployNodes` as in the previous paragraph and then load the generated `orac
 plugins folder of your node on TestNet:
 
 ```bash
-scp <host:port>:~/plugins/
+scp build/nodes/aNode/plugins/oraclize-corda-api-X.X.X.jar <host:port>:~/plugins/
 ```
 
 Run the jar and type in the **`crash`** shell the following:
@@ -93,8 +93,8 @@ The steps performed by the example are:
 val answ = subFlow(OraclizeQueryWaitFlow(
         datasource = "URL",
         query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
-        delay = 0,
-        proofType = 16)
+        proofType = 16,
+        delay = 0)
     )
 ```
 
@@ -110,9 +110,8 @@ val answ = subFlow(OraclizeQueryWaitFlow(
 **Optional step:** Verify the proof received:
 
 ```kotlin
-OraclizeUtils.ProofVerificationTool().use {
-    require(it.verifyProof(answ.proof as ByteArray))
-}
+val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
+proofVerificationTool.verifyProof(answer.proof as ByteArray)
 ```
 
 **Step 2:** after the `CashOwningState` and the `Answer` are defined, each one is then inserted in a command:
@@ -120,6 +119,7 @@ OraclizeUtils.ProofVerificationTool().use {
 ```kotlin
 // The command which defines the fact of issuing cash
 val issueState = CashOwningState(amount, ourIdentity)
+
 // The command wrapping our Oraclize's answer
 val issueCommand = Command(
     CashIssueContract.Commands.Issue(),
@@ -160,7 +160,8 @@ override fun verify(tx: LedgerTransaction) {
         val rate = answCmd.value.result as String
         "The rate USD/GBP must be over $USD_GBP_RATE_THRESH" using (rate.toDouble() > USD_GBP_RATE_THRESH)
         // ...and the relative authenticity proof
-        "Oraclize's proof verification failed" using  (OraclizeUtils.verifyProof(answCmd.value.proof as ByteArray))
+        "Oraclize's proof verification failed" using  (
+            proofVerificationTool.verifyProof(answCmd.value.proof as ByteArray))
     }
 }
 ```
