@@ -1,10 +1,23 @@
 package it.oraclize.cordapi
 
+<<<<<<< HEAD
 import com.eclipsesource.v8.*
 import net.corda.core.flows.FlowException
 
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.loggerFor
+=======
+import co.paralleluniverse.fibers.Fiber
+import com.eclipsesource.v8.*
+import com.eclipsesource.v8.utils.MemoryManager
+import it.oraclize.cordapi.flows.OraclizeQueryStatusFlow
+import net.corda.core.flows.FlowException
+import net.corda.core.flows.FlowLogic
+
+import net.corda.core.identity.CordaX500Name
+import net.corda.core.utilities.loggerFor
+import java.io.Closeable
+>>>>>>> EXPORT
 
 import java.io.PrintWriter
 import java.nio.ByteBuffer
@@ -17,6 +30,7 @@ class OraclizeUtils {
         val console = loggerFor<OraclizeUtils>()
 
         @JvmStatic
+<<<<<<< HEAD
         private fun toV8TypedArray(nodeJS: NodeJS, proof: ByteArray) : V8TypedArray {
 
             var proofArray : V8ArrayBuffer? = null
@@ -35,6 +49,19 @@ class OraclizeUtils {
         }
 
         @JvmStatic private fun setBundleFile() : Path {
+=======
+        fun getNodeName() = CordaX500Name(
+                "Oraclize",
+                "London",
+                "GB"
+        )
+    }
+
+    class ProofVerificationTool {
+
+
+        private fun setBundleFile() : Path {
+>>>>>>> EXPORT
             val pathToBundle = Paths.get(".")
                     .toAbsolutePath()
                     .resolve("pvtBundle.js")
@@ -43,7 +70,11 @@ class OraclizeUtils {
             if (!pathToBundle.toFile().exists()) {
 
                 val bundle = ClassLoader
+<<<<<<< HEAD
                         .getSystemResourceAsStream("proof-verification-tool/bundleNode.js")
+=======
+                        .getSystemResourceAsStream("bundleNode.js")
+>>>>>>> EXPORT
                         .bufferedReader()
 
                 val pw = PrintWriter(pathToBundle.toFile())
@@ -53,12 +84,17 @@ class OraclizeUtils {
                         it.println(line)
                 }
 
+<<<<<<< HEAD
                 console.info("File pvtBundle.js has been written on disk.")
+=======
+                console.info("Proof-verification-tool stored.")
+>>>>>>> EXPORT
             }
 
             return pathToBundle
         }
 
+<<<<<<< HEAD
         @JvmStatic private fun proofVerificationTool(proof: ByteArray) : Boolean {
 
             val pathToBundle = setBundleFile()
@@ -98,10 +134,69 @@ class OraclizeUtils {
             proofVerifier.release()
             proofV8.release()
             nodeJS.release()
+=======
+        private fun toV8TypedArray(nodeJS: NodeJS, proof: ByteArray) : V8TypedArray {
+
+            var proofArray : V8ArrayBuffer? = null
+
+            try {
+                val proofBB = ByteBuffer.allocateDirect(proof.size)
+                proofBB.put(proof)
+
+                proofArray = V8ArrayBuffer(nodeJS.runtime, proofBB)
+
+                return V8TypedArray(nodeJS.runtime, proofArray,
+                        V8Value.UNSIGNED_INT_8_ARRAY, 0, proof.size)
+            } finally {
+                proofArray?.release()
+            }
+        }
+
+        private fun verify(proof: ByteArray) : Boolean {
+
+            // Check if the bundle exists, otherwise it'll save it to disk
+            val pathToBundle = setBundleFile()
+
+            // Loading the module, preparing the required objects
+            val nodeJS = NodeJS.createNodeJS()
+            val memV8 = MemoryManager(nodeJS.runtime)
+            val proofVerificationToolModule = nodeJS.require(pathToBundle.toFile())
+
+            var v8Object : V8Object? = null
+            val callback = V8Function(nodeJS.runtime,
+                    { _, parameters: V8Array? -> v8Object = parameters?.getObject(0); Unit }
+            )
+
+            // Converts the proof into a valid V8 byte array
+            val proofV8 = toV8TypedArray(nodeJS, proof)
+
+            // js verifyProof call
+            proofVerificationToolModule
+                    .executeJSFunction("verifyProof", proofV8, callback) as V8Object
+
+            // Must be done in this way, because when the loop is done
+            // isRunning will be set to false, and will remain false until
+            // NodeJS.createNodeJS() is called or handleMessage is called
+            do {
+                nodeJS.handleMessage()
+            } while (nodeJS.isRunning)
+
+            // Wait for the callback's rawValue
+            while (v8Object == null)
+                continue
+
+            // Explore the object returned
+            val mainProof = v8Object?.getObject("mainProof") as V8Object
+            val isVerified = mainProof.getBoolean("isVerified")
+
+            // Release resources
+            memV8.release()
+>>>>>>> EXPORT
 
             return isVerified
         }
 
+<<<<<<< HEAD
         @JvmStatic
         fun verifyProof(proof: ByteArray?) : Boolean {
             if (proof != null)
@@ -117,4 +212,9 @@ class OraclizeUtils {
                 "GB"
         )
     }
+=======
+        fun verifyProof(proof: ByteArray) : Boolean { return verify(proof) }
+    }
+
+>>>>>>> EXPORT
 }
