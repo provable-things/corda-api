@@ -14,7 +14,7 @@ import net.corda.core.utilities.loggerFor
 
 @InitiatingFlow
 @StartableByRPC
-class OraclizeQueryWaitFlow (val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<Answer>() {
+class OraclizeQueryAwaitFlow(val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<Answer>() {
 
     companion object {
         object PROCESSING : ProgressTracker.Step("Wait for the results.")
@@ -31,15 +31,11 @@ class OraclizeQueryWaitFlow (val datasource: String, val query: String, val proo
         val oracle = serviceHub.identityService
                 .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
-        val queryID = subFlow(OraclizeQueryFlow(
-                datasource = "URL",
-                query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
-                proofType = 16
-        ))
+        val queryId = subFlow(OraclizeQueryFlow(datasource, query, proofType))
 
-        while (!subFlow(OraclizeQueryStatusFlow(queryID)))
+        while (!subFlow(OraclizeQueryStatusFlow(queryId)))
             Fiber.sleep(5000)
 
-        return subFlow(OraclizeQueryResultFlow(queryID))
+        return subFlow(OraclizeQueryResultFlow(queryId))
     }
 }

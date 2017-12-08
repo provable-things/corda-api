@@ -103,7 +103,7 @@ class OraclizeUtils {
                 nodeJS.handleMessage()
             } while (nodeJS.isRunning)
 
-            // Wait for the callback's result
+            // Wait for the callback's rawValue
             while (v8Object == null)
                 continue
 

@@ -1,13 +1,12 @@
 package it.oraclize.cordapi.examples.flows
 
-import co.paralleluniverse.fibers.Fiber
 import co.paralleluniverse.fibers.Suspendable
-import com.sun.org.apache.regexp.internal.RESyntaxException
 import it.oraclize.cordapi.OraclizeUtils
 import it.oraclize.cordapi.entities.Answer
 import it.oraclize.cordapi.examples.contracts.CashIssueContract
 import it.oraclize.cordapi.examples.states.CashOwningState
 import it.oraclize.cordapi.flows.*
+import it.oraclize.cordapi.entities.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndContract
 import net.corda.core.flows.*
@@ -26,8 +25,8 @@ object Example {
     class Initiator(val amount: Int) : FlowLogic<SignedTransaction>() {
         companion object {
             object QUERYING_ORACLE : ProgressTracker.Step("Sending query to Oraclize")
-            object RESULTS_RECEIVED : ProgressTracker.Step("Waiting for the result from Oraclize")
-            object PROOF: ProgressTracker.Step("Verifying the authenticity proof backing the result")
+            object RESULTS_RECEIVED : ProgressTracker.Step("Waiting for the rawValue from Oraclize")
+            object PROOF: ProgressTracker.Step("Verifying the authenticity proof backing the rawValue")
             object CREATING_TX : ProgressTracker.Step("Creating the transaction")
             object VERIFYING_TX : ProgressTracker.Step("Verifying the transaction")
             object GATHERING_SIGNS : ProgressTracker.Step("Gathering signatures")
@@ -53,12 +52,13 @@ object Example {
 
             progressTracker.currentStep = QUERYING_ORACLE
 
-            val answer = subFlow(OraclizeQueryWaitFlow(
+            val answer = subFlow(OraclizeQueryAwaitFlow(
                     datasource = "URL",
                     query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
-                    proofType = 16
+                    proofType = ProofType.TLSNOTARY
             ))
 
+            console.info(answer.toString())
 
             progressTracker.currentStep = RESULTS_RECEIVED
 

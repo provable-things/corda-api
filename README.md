@@ -90,7 +90,7 @@ The steps performed by the example are:
   * *proof type:* a integer number that identifies the type of authenticity proof we want
 
 ```kotlin
-val answ = subFlow(OraclizeQueryWaitFlow(
+val answ = subFlow(OraclizeQueryAwaitFlow(
         datasource = "URL",
         query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
         proofType = 16,
