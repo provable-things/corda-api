@@ -1,18 +1,11 @@
 buildscript {
-<<<<<<< HEAD
-    ext.corda_release_version = '1.0.0'
-=======
     ext.corda_release_version = '2.0.0'
->>>>>>> EXPORT
     ext.corda_gradle_plugins_version = '1.0.0'
     ext.kotlin_version = '1.1.60'
     ext.junit_version = '4.12'
     ext.quasar_version = '0.7.6'
 
-<<<<<<< HEAD
-=======
 
->>>>>>> EXPORT
     repositories {
         mavenLocal()
         mavenCentral()
@@ -43,16 +36,11 @@ sourceSets {
     main {
         resources {
             srcDir "../config/dev"
-<<<<<<< HEAD
-=======
             exclude 'src/main/resources/proof-verification-tool'
->>>>>>> EXPORT
         }
     }
 }
 
-<<<<<<< HEAD
-=======
 // Function to compile the J2V8 dependency
 def j2v8_dependency(architecture) {
     // Mapping for each different architecture given
@@ -71,17 +59,11 @@ def j2v8_dependency(architecture) {
 }
 
 import static org.apache.tools.ant.taskdefs.condition.Os.*
->>>>>>> EXPORT
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testCompile "junit:junit:$junit_version"
 
-<<<<<<< HEAD
-//    testCompile project(":corda-api")
-
-=======
->>>>>>> EXPORT
     // Corda integration dependencies
     cordaCompile "net.corda:corda-core:$corda_release_version"
     cordaCompile "net.corda:corda-finance:$corda_release_version"
@@ -94,10 +76,6 @@ dependencies {
 
     testCompile "net.corda:corda-node-driver:$corda_release_version"
 
-<<<<<<< HEAD
-    // Cordapp dependencies
-    compile "com.eclipsesource.j2v8:j2v8_macosx_x86_64:4.6.0"
-=======
     // Checking the current os
     if (project.hasProperty('os')) {
         compile j2v8_dependency(os)
@@ -112,19 +90,15 @@ dependencies {
     }
 
     // Cordapp dependencies
->>>>>>> EXPORT
     compile "org.apache.commons:commons-lang3:3.0"
     compile "commons-codec:commons-codec:1.9"
 }
 
-<<<<<<< HEAD
-=======
 jar {
     baseName 'oraclize-corda-api'
     version project.property('version')
 }
 
->>>>>>> EXPORT
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         languageVersion = "1.1"

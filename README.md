@@ -1,10 +1,6 @@
 ## Oraclize `corda-api` repo
 
 Clone this repository with the `--recursive` flag, due the presence of submodules.
-<<<<<<< HEAD
-
-Once cloned, perform the following inside `src/main/resources/proof-verification-tool/`:
-=======
 Download the submodule:
 
 ```bash
@@ -12,7 +8,6 @@ git submodule update --init
 ```
 
 Once cloned, go inside `libs/proof-verification-tool/` and build the tool:
->>>>>>> EXPORT
 
 ```bash
 yarn install
@@ -20,27 +15,6 @@ yarn build
 yarn browserify-node
 ```
 
-<<<<<<< HEAD
-#### Execute the example
-
-How to run the examples:
-
-```bash
-gradle deployNodes
-./buid/nodes/runnodes
-```
-
-In the **`crash`** shell:
-
-```bash
->>> start Example amount: 10
->>> run vaultQuery contractStateType: it.oraclize.cordapi.examples.states.CashOwningState
-```
-
-#### Want to Oraclize?
-
-Put the following lines into the `build.gradle` file:
-=======
 Then move the bundle into `resource` folder:
 
 ```
@@ -81,7 +55,6 @@ If you want to check the transaction stored, type:
 #### Want to use Oraclize as a dependency?
 
 Say no more, put the following lines into the `build.gradle` file:
->>>>>>> EXPORT
 
 ```groovy
 repositories {
@@ -117,19 +90,11 @@ The steps performed by the example are:
   * *proof type:* a integer number that identifies the type of authenticity proof we want
 
 ```kotlin
-<<<<<<< HEAD
-val answ = subFlow(OraclizeQueryFlow(
-        datasource = "URL",
-        query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
-        delay = 0,
-        proofType = 16)
-=======
 val answ = subFlow(OraclizeQueryAwaitFlow(
         datasource = "URL",
         query = "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP",
         proofType = 16,
         delay = 0)
->>>>>>> EXPORT
     )
 ```
 
@@ -145,12 +110,8 @@ val answ = subFlow(OraclizeQueryAwaitFlow(
 **Optional step:** Verify the proof received:
 
 ```kotlin
-<<<<<<< HEAD
-require(OraclizeUtils.verifyProof(answ.proof as ByteArray))
-=======
 val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
 proofVerificationTool.verifyProof(answer.proof as ByteArray)
->>>>>>> EXPORT
 ```
 
 **Step 2:** after the `CashOwningState` and the `Answer` are defined, each one is then inserted in a command:
@@ -158,16 +119,6 @@ proofVerificationTool.verifyProof(answer.proof as ByteArray)
 ```kotlin
 // The command which defines the fact of issuing cash
 val issueState = CashOwningState(amount, ourIdentity)
-<<<<<<< HEAD
-// The command wrapping our Oraclize's answer
-val issueCommand = Command(
-                        CashIssueContract.Commands.Issue(),
-                        issueState.participants.map { it.owningKey }
-                   )
-// Get Oraclize's node
-val oracle = serviceHub.identityService
-            .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
-=======
 
 // The command wrapping our Oraclize's answer
 val issueCommand = Command(
@@ -177,7 +128,6 @@ val issueCommand = Command(
 // Get Oraclize's node
 val oracle = serviceHub.identityService
     .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
->>>>>>> EXPORT
 val answerCommand = Command(answ, oracle.owningKey)
 ```
 
@@ -210,12 +160,8 @@ override fun verify(tx: LedgerTransaction) {
         val rate = answCmd.value.result as String
         "The rate USD/GBP must be over $USD_GBP_RATE_THRESH" using (rate.toDouble() > USD_GBP_RATE_THRESH)
         // ...and the relative authenticity proof
-<<<<<<< HEAD
-        "Oraclize's proof verification failed" using  (OraclizeUtils.verifyProof(answCmd.value.proof as ByteArray))
-=======
         "Oraclize's proof verification failed" using  (
             proofVerificationTool.verifyProof(answCmd.value.proof as ByteArray))
->>>>>>> EXPORT
     }
 }
 ```
