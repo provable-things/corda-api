@@ -44,9 +44,11 @@ sourceSets {
 // Function to compile the J2V8 dependency
 def j2v8_dependency(architecture) {
     // Mapping for each different architecture given
-    def archs = [windows:'com.eclipsesource.j2v8:j2v8_win32_x86_64:4.6.0',
+    def archs = [
+             win32:'com.eclipsesource.j2v8:j2v8_win32_x86_64:4.6.0',
              linux:'com.eclipsesource.j2v8:j2v8_linux_x86_64:4.8.0',
-             mac:'com.eclipsesource.j2v8:j2v8_macosx_x86_64:4.6.0']
+             macos:'com.eclipsesource.j2v8:j2v8_macosx_x86_64:4.6.0',
+    ]
 
     if (!(architecture in archs))
         throw new GradleScriptException("$os operating system not supported.", null)
@@ -81,9 +83,9 @@ dependencies {
         compile j2v8_dependency(os)
     } else {
         if (isFamily(FAMILY_WINDOWS)) {
-            compile j2v8_dependency('windows')
+            compile j2v8_dependency('win32')
         } else if (isFamily(FAMILY_MAC)) {
-            compile j2v8_dependency('mac')
+            compile j2v8_dependency('macos')
         } else {
             compile j2v8_dependency('linux')
         }

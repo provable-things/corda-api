@@ -35,8 +35,9 @@ mv pvtBundle.js src/main/resources/proof-verification-tool
 #### Build the project
 
 ```bash
-gradlew build [-Pos=[mac,windows,linux]]
+gradlew build [-Pos=[macos, win32, linux]]
 ``` 
+
 `-Pos` is optional and specify the architecture you want to build against to. This is useful if you want
 to export the jar produced in a machine with a different operating system. 
 If the `-Pos` argument is not given, the local architecture is automatically detected as well as the relative 
