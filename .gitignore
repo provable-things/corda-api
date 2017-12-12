@@ -76,3 +76,6 @@ docs/virtualenv/
 
 # Src not included
 /src/main/resources/bundleNode.js
+
+# Don't include the import script
+import.sh
