@@ -1,9 +1,20 @@
-## Oraclize `corda-api` repo
 
-Clone this repository with the `--recursive` flag, due the presence of submodules.
-Download the submodule:
+## Oraclize `corda-api`
+
+### External references
+
+Documentation: [docs.oraclize.it](http://docs.oraclize.it)
+
+Gitter public support channel: 
+[![Join the chat at https://gitter.im/oraclize/corda-api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/oraclize/corda-api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+
+### Setup instructions
+
+Clone this repository with the `--recursive` flag, due to the presence of submodules:
 
 ```bash
+git clone --recursive https://github.com/oraclize/corda-api.git
 git submodule update --init
 ```
 
