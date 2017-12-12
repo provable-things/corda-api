@@ -25,8 +25,8 @@ object Example {
     class Initiator(val amount: Int) : FlowLogic<SignedTransaction>() {
         companion object {
             object QUERYING_ORACLE : ProgressTracker.Step("Sending query to Oraclize")
-            object RESULTS_RECEIVED : ProgressTracker.Step("Waiting for the rawValue from Oraclize")
-            object PROOF: ProgressTracker.Step("Verifying the authenticity proof backing the rawValue")
+            object RESULTS_RECEIVED : ProgressTracker.Step("Waiting for the result from Oraclize")
+            object PROOF: ProgressTracker.Step("Verifying the authenticity proof backing the result")
             object CREATING_TX : ProgressTracker.Step("Creating the transaction")
             object VERIFYING_TX : ProgressTracker.Step("Verifying the transaction")
             object GATHERING_SIGNS : ProgressTracker.Step("Gathering signatures")
