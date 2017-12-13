@@ -79,3 +79,4 @@ docs/virtualenv/
 
 # Don't include the import script
 import.sh
+set-archs.sh
