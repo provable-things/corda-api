@@ -1,0 +1,3 @@
+[submodule "libs/proof-verification-tool"]
+	path = libs/proof-verification-tool
+	url = https://github.com/oraclize/proof-verification-tool.git
