@@ -18,25 +18,19 @@ git clone --recursive https://github.com/oraclize/corda-api.git
 git submodule update --init
 ```
 
-Once cloned, go inside `libs/proof-verification-tool/` and build the tool:
+Once cloned, run:
 
 ```bash
-yarn install
-yarn build
-yarn browserify-node
+./setup
 ```
 
-Then move the bundle into `resource` folder:
-
-```
-mv pvtBundle.js src/main/resources/proof-verification-tool
-```
 
 #### Build the project
 
 ```bash
 gradlew build [-Pos=[macos, win32, linux]]
 ``` 
+
 `-Pos` is optional and specify the architecture you want to build against to. This is useful if you want
 to export the jar produced in a machine with a different operating system. 
 If the `-Pos` argument is not given, the local architecture is automatically detected as well as the relative 
