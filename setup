@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+#
+# Builds the proof-verification-tool by using yarn
+# and moves the bundle in the correct folder.
+#
+
+cd ./libs/proof-verification-tool/
+yarn install
+yarn build
+yarn browserify-node
+cd ..
+cd ..
+
+cp ./libs/proof-verification-tool/bundleNode.js ./src/main/resources/
