@@ -31,6 +31,10 @@ class OraclizeUtils {
 
     class ProofVerificationTool {
 
+        init {
+            setBundleFile()
+        }
+
 
         private fun setBundleFile() : Path {
             val pathToBundle = Paths.get(".")
@@ -44,6 +48,7 @@ class OraclizeUtils {
                         .getSystemResourceAsStream("bundleNode.js")
                         .bufferedReader()
 
+                loggerFor<ProofVerificationTool>().info(pathToBundle.toFile().toString())
                 val pw = PrintWriter(pathToBundle.toFile())
 
                 pw.use {
