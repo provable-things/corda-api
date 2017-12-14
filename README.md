@@ -18,19 +18,12 @@ git clone --recursive https://github.com/oraclize/corda-api.git
 git submodule update --init
 ```
 
-Once cloned, go inside `libs/proof-verification-tool/` and build the tool:
+Once cloned, run:
 
 ```bash
-yarn install
-yarn build
-yarn browserify-node
+./setup
 ```
 
-Then move the bundle into `resource` folder:
-
-```
-mv pvtBundle.js src/main/resources/proof-verification-tool
-```
 
 #### Build the project
 
