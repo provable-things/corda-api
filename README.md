@@ -38,14 +38,13 @@ J2V8 dependency.
 
 #### Execute the example on TestNet:
 
-Run `deployNodes` as in the previous paragraph and then load the generated `oraclize-corda-api-x.x.jar` into the 
-plugins folder of your node on TestNet:
+Copy the jar produced by the previous step into your node's plugin folder on Testnet like the following:
 
 ```bash
 scp build/nodes/aNode/plugins/oraclize-corda-api-X.X.X.jar <host:port>:~/plugins/
 ```
 
-Run the jar and type in the **`crash`** shell the following:
+Run your CordApp and type in the **`crash`** shell the following:
 
 ```bash
 >>> start Example amount: 10
@@ -67,10 +66,17 @@ repositories {
 }
 
 dependencies {
-    compile "com.github.oraclize:corda-api:master-SNAPSHOT"
+    compile "com.github.oraclize:corda-api:linux_x86_64-SNAPSHOT"
 }
 ```
 
+**Note:** Choose a dependency from which architecture you are intended to use:
+
+  * *Linux:* com.github.oraclize:corda-api:linux_x86_64-SNAPSHOT
+  * *Windows:* com.github.oraclize:corda-api:win32_x86_64-SNAPSHOT
+  * *maxOS:* com.github.oraclize:corda-api:macosx_x86_64-SNAPSHOT
+  
+  
 ### Use case
 
 We want to _issue_ cash to a _party_ only if an the change USD/GBP is above a certain value. A query asking for the USD/GBP rate to the Oraclize module will be performed.
