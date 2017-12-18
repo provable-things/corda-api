@@ -74,7 +74,7 @@ dependencies {
 
   * *Linux:* com.github.oraclize:corda-api:linux_x86_64-SNAPSHOT
   * *Windows:* com.github.oraclize:corda-api:win32_x86_64-SNAPSHOT
-  * *maxOS:* com.github.oraclize:corda-api:macosx_x86_64-SNAPSHOT
+  * *macOS:* com.github.oraclize:corda-api:macosx_x86_64-SNAPSHOT
   
   
 ### Use case
