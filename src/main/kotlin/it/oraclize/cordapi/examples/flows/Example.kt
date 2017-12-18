@@ -79,7 +79,7 @@ object Example {
                     issueCommand, answerCommand)
 
             progressTracker.currentStep = VERIFYING_TX
-            txBuilder.toLedgerTransaction(serviceHub).verify() // <- it cannot be modified
+            txBuilder.verify(serviceHub)
 
             // Give to the oracle only the appropriate
             // commands inside the tx
