@@ -28,7 +28,7 @@ Once cloned, run:
 #### Build the project
 
 ```bash
-gradlew build [-Pos=[macos, win32, linux]]
+./gradlew build [-Pos=[macos, win32, linux]]
 ``` 
 
 `-Pos` is optional and specify the architecture you want to build against to. This is useful if you want
