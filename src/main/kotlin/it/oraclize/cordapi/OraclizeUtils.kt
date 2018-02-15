@@ -107,7 +107,7 @@ class OraclizeUtils {
             val nodeJS = NodeJS.createNodeJS()
             val memV8 = MemoryManager(nodeJS.runtime)
 
-            // Exits the current flow when expired
+            // Exit the current flow when expired
             val timeout = Thread {
                 try {
                     Thread.sleep(VERIFY_FUNCTION_TIMEOUT)
