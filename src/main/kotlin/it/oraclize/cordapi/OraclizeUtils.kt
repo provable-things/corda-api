@@ -1,10 +1,8 @@
 package it.oraclize.cordapi
 
-import co.paralleluniverse.fibers.Fiber
-import co.paralleluniverse.fibers.Suspendable
-import co.paralleluniverse.strands.SuspendableCallable
 import com.eclipsesource.v8.*
 import com.eclipsesource.v8.utils.MemoryManager
+import com.sun.xml.internal.fastinfoset.algorithm.BooleanEncodingAlgorithm
 import net.corda.core.flows.FlowException
 
 import net.corda.core.identity.CordaX500Name
@@ -14,6 +12,7 @@ import java.io.PrintWriter
 import java.nio.ByteBuffer
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.concurrent.TimeoutException
 import kotlin.concurrent.timer
 
 class OraclizeUtils {
@@ -29,32 +28,23 @@ class OraclizeUtils {
         )
     }
 
-//    data class Timeout(val nodeJS: NodeJS) : Thread() {
-//        override fun run() {
-//            try {
-//                Thread.sleep(3000)
-//            } catch (e : InterruptedException) {
-//                console.info(e.stackTrace.toString())
-//            }
-//
-//            println("inside the thread")
-//            if (nodeJS.isRunning) {
-//                nodeJS.runtime.terminateExecution()
-//                throw FlowException("Proof verification tool: execution timeout expired.")
-//            }
-//        }
-//
-//    }
-
-    class TimeoutException : Exception()
-
+    /**
+     * Wrapper class to our nodeJS proof
+     * verification tool.
+     */
     class ProofVerificationTool {
         companion object {
             @JvmStatic
-            private val VERIFY_FUNCTION_TIMEOUT: Long = 300000 // 5 minutes
+            private val VERIFY_FUNCTION_TIMEOUT: Long = 120000 // 2 minutes
+
         }
 
+        fun console(a: Any) = loggerFor<ProofVerificationTool>().info(a.toString())
 
+        /**
+         * Save to disk the NodeJS bundle containing
+         * all the proof verify methods.
+         */
         private fun setBundleFile() : Path {
             val pathToBundle = Paths.get(".")
                     .toAbsolutePath()
@@ -63,25 +53,31 @@ class OraclizeUtils {
 
             if (!pathToBundle.toFile().exists()) {
 
+                // Loads the file from the resources
                 val bundle = ClassLoader
                         .getSystemResourceAsStream("bundleNode.js")
                         .bufferedReader()
 
-                loggerFor<ProofVerificationTool>().info(pathToBundle.toFile().toString())
-                val pw = PrintWriter(pathToBundle.toFile())
+                console(pathToBundle.toFile().toString())
 
-                pw.use {
+                val writer = PrintWriter(pathToBundle.toFile())
+
+                writer.use {
                     for (line in bundle.readLines())
                         it.println(line)
                 }
 
-                console.info("Proof-verification-tool stored.")
+                console.info("Bundle stored in $pathToBundle.")
             }
 
             return pathToBundle
         }
 
-        private fun toV8TypedArray(nodeJS: NodeJS, proof: ByteArray) : V8TypedArray {
+        /**
+         * Converts a read proof into a V8TypedArray, ready to be passed
+         * as a parameter to a V8Function.
+         */
+        private fun toV8TypedArray(nodeJS: NodeJS, proof: ByteArray): V8TypedArray {
 
             var proofArray : V8ArrayBuffer? = null
 
@@ -98,81 +94,75 @@ class OraclizeUtils {
             }
         }
 
+        /**
+         * Calls the relative NodeJS function
+         * verifying the proof.
+         */
         private fun verify(proof: ByteArray) : Boolean {
 
-            // Check if the bundle exists, otherwise it'll save it to disk
-            val pathToBundle = setBundleFile()
+            val bundleFile = setBundleFile().toFile()
 
-            // Loading the module, preparing the required objects
             val nodeJS = NodeJS.createNodeJS()
             val memV8 = MemoryManager(nodeJS.runtime)
 
-            // Exit the current flow when expired
+            val proofVerificationToolModule = nodeJS.require(bundleFile)
+
+            var v8Object : V8Object? = null
+            val callback = V8Function(
+                    nodeJS.runtime,
+                    { _, parameters: V8Array? ->
+                        v8Object = parameters?.getObject(0)
+                        Unit
+                    }
+            )
+
+            val proofV8 = toV8TypedArray(nodeJS, proof)
+
+            try {
+                proofVerificationToolModule
+                        .executeJSFunction("verifyProof", proofV8, callback) as V8Object
+            } catch (e: V8ScriptExecutionException) {
+                FlowException("Proof verification failed due to the following error: \n\n ${e.message}",
+                        e.cause)
+            }
+
             val timeout = Thread {
                 try {
                     Thread.sleep(VERIFY_FUNCTION_TIMEOUT)
+                    throw TimeoutException("ProofVerificationTool: Timeout expired.")
                 } catch (e : InterruptedException) {
-                    console.info("$e")
+                    console.info("ProofVerificationTool: Timeout interrupted.")
                 }
             }
 
+
+            // TL;DR isRunning is false until NodeJS.createNodeJS()
+            // is called or handleMessage is called
+            do {
+                nodeJS.handleMessage()
+            } while (nodeJS.isRunning && timeout.isAlive)
+
             try {
-                val proofVerificationToolModule = nodeJS.require(pathToBundle.toFile())
-
-                var v8Object : V8Object? = null
-                val callback = V8Function(nodeJS.runtime,
-                        { _, parameters: V8Array? -> v8Object = parameters?.getObject(0); Unit }
-                )
-
-                // Converts the proof into a valid V8 byte array
-                val proofV8 = toV8TypedArray(nodeJS, proof)
-
-                // verifyProof() in js code
-                proofVerificationToolModule
-                        .executeJSFunction("verifyProof", proofV8, callback) as V8Object
-
-
                 timeout.start()
 
-                // Must be done in this way as when the loop is stopped
-                // isRunning will be set to false, and will remain false until
-                // NodeJS.createNodeJS() is called or handleMessage is called
-                do {
-                    nodeJS.handleMessage()
-                } while (nodeJS.isRunning && timeout.isAlive)
-
-
-                if (!timeout.isAlive) {
-                    nodeJS.runtime.terminateExecution()
-                    throw FlowException("Error: verifyProof() timeout expired.")
-                }
-
-
-                // Wait for the callback's value
-                while (v8Object == null)
+                while (v8Object == null && timeout.isAlive)
                     continue
 
-                // Explore the object returned
                 val mainProof = v8Object?.getObject("mainProof") as V8Object
 
                 return mainProof.getBoolean("isVerified")
 
-            } catch (e : RuntimeException) {
-                throw FlowException(e)
             } finally {
-
-                // Stop the timeout if not expired
-                if (timeout.isAlive) {
+                if (timeout.isAlive)
                     timeout.interrupt()
-                    console.info("timeout released: ${timeout.isAlive}")
-                }
 
-                console.info("Releasing V8 resources")
-                // Release resources
                 memV8.release()
             }
         }
 
+        /**
+         * Verify the Oraclize's proof
+         */
         fun verifyProof(proof: ByteArray) : Boolean { return verify(proof) }
     }
 
