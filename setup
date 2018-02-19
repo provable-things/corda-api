@@ -12,4 +12,4 @@ yarn browserify-node
 cd ..
 cd ..
 
-cp ./libs/proof-verification-tool/bundleNode.js ./src/main/resources/
+cp ./libs/proof-verification-tool/bundleNode.js ./src/main/resources/pvtBundle.js

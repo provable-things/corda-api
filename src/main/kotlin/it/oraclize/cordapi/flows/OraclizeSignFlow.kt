@@ -31,6 +31,7 @@ class OraclizeSignFlow(private val ftx: FilteredTransaction) : FlowLogic<Transac
         val session = initiateFlow(oracle)
 
         val untrustedData: UntrustworthyData<TransactionSignature> = session.sendAndReceive(ftx)
+
         return untrustedData.unwrap { tx ->
             // TODO(additional checks?)
             tx
