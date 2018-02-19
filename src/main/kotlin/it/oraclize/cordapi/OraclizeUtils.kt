@@ -35,7 +35,7 @@ class OraclizeUtils {
     class ProofVerificationTool {
         companion object {
             @JvmStatic
-            private val VERIFY_FUNCTION_TIMEOUT: Long = 10000 // 2 minutes
+            private val VERIFY_FUNCTION_TIMEOUT: Long = 120000 // 2 minutes
 
         }
 
