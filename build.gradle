@@ -55,7 +55,7 @@ def j2v8_dependency(architecture) {
 
     def j2v8_dep = archs.get(architecture)
 
-    println("Build with $j2v8_dep")
+    println("Built with $j2v8_dep")
 
     return j2v8_dep
 }
