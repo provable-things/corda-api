@@ -58,6 +58,12 @@ object Example {
                     proofType = ProofType.TLSNOTARY
             ))
 
+//            val answer = subFlow(OraclizeQueryAwaitFlow(
+//                    datasource = "URL",
+//                    query = "https://arxiv.org/pdf/1704.02781.pdf",
+//                    proofType = ProofType.TLSNOTARY
+//            ))
+
             console.info(answer.toString())
 
             progressTracker.currentStep = RESULTS_RECEIVED
