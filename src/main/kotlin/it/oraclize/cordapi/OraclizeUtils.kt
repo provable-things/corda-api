@@ -1,21 +1,30 @@
 package it.oraclize.cordapi
 
+import co.paralleluniverse.fibers.Suspendable
 import com.eclipsesource.v8.*
 import com.eclipsesource.v8.utils.MemoryManager
 import com.sun.xml.internal.fastinfoset.algorithm.BooleanEncodingAlgorithm
+import it.oraclize.cordapi.entities.Answer
+import net.corda.core.contracts.Command
 import net.corda.core.flows.FlowException
 
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.identity.Party
+import net.corda.core.node.ServiceHub
 import net.corda.core.utilities.loggerFor
 
 import java.io.PrintWriter
 import java.nio.ByteBuffer
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.security.PublicKey
 import java.util.concurrent.TimeoutException
 import kotlin.concurrent.timer
 
 class OraclizeUtils {
+
+
+
     companion object {
         @JvmStatic
         val console = loggerFor<OraclizeUtils>()
@@ -26,6 +35,16 @@ class OraclizeUtils {
                 "London",
                 "GB"
         )
+
+
+    }
+
+    @Suspendable
+    fun filtering(oracleKey: PublicKey, elem: Any): Boolean {
+        return when (elem) {
+            is Command<*> -> oracleKey in elem.signers && elem.value is Answer
+            else -> false
+        }
     }
 
     /**
@@ -33,13 +52,9 @@ class OraclizeUtils {
      * verification tool.
      */
     class ProofVerificationTool {
-        companion object {
-            @JvmStatic
-            private val VERIFY_FUNCTION_TIMEOUT: Long = 120000 // 2 minutes
 
-        }
 
-        fun console(a: Any) = loggerFor<ProofVerificationTool>().info(a.toString())
+        private fun console(a: Any) = loggerFor<ProofVerificationTool>().info(a.toString())
 
         /**
          * Save to disk the NodeJS bundle containing
@@ -98,14 +113,14 @@ class OraclizeUtils {
          * Calls the relative NodeJS function
          * verifying the proof.
          */
-        private fun verify(proof: ByteArray) : Boolean {
+        private fun verify(proof: ByteArray, timer: Long? = null) : Boolean {
 
             val bundleFile = setBundleFile().toFile()
 
             val nodeJS = NodeJS.createNodeJS()
             val memV8 = MemoryManager(nodeJS.runtime)
 
-            val proofVerificationToolModule = nodeJS.require(bundleFile)
+            val module = nodeJS.require(bundleFile)
 
             var v8Object : V8Object? = null
             val callback = V8Function(
@@ -119,19 +134,20 @@ class OraclizeUtils {
             val proofV8 = toV8TypedArray(nodeJS, proof)
 
             try {
-                proofVerificationToolModule
-                        .executeJSFunction("verifyProof", proofV8, callback) as V8Object
+                module.executeJSFunction("verifyProof", proofV8, callback) as V8Object
             } catch (e: V8ScriptExecutionException) {
                 FlowException("Proof verification failed due to the following error: \n\n ${e.message}",
                         e.cause)
             }
 
+            val timeToSleep = timer ?: 300000 // 5 minutes
+
             val timeout = Thread {
                 try {
-                    Thread.sleep(VERIFY_FUNCTION_TIMEOUT)
+                    Thread.sleep(timeToSleep)
                     throw TimeoutException("ProofVerificationTool: Timeout expired.")
                 } catch (e : InterruptedException) {
-                    console.info("ProofVerificationTool: Timeout interrupted.")
+                    console.info("ProofVerificationTool: time expired.")
                 }
             }
 
@@ -140,18 +156,20 @@ class OraclizeUtils {
             // is called or handleMessage is called
             do {
                 nodeJS.handleMessage()
-            } while (nodeJS.isRunning && timeout.isAlive)
+            } while (nodeJS.isRunning)
 
-            try {
+            return try {
                 timeout.start()
 
                 while (v8Object == null && timeout.isAlive)
                     continue
 
-                val mainProof = v8Object?.getObject("mainProof") as V8Object
+                val mainProof = v8Object?.getObject("mainProof") as V8Object // if is null, then
+                                                                             // the timeout has expired
+                mainProof.getBoolean("isVerified")
 
-                return mainProof.getBoolean("isVerified")
-
+            } catch (e: TypeCastException) {
+                throw TimeoutException("ProofVerificationTool: time has expired.")
             } finally {
                 if (timeout.isAlive)
                     timeout.interrupt()
@@ -163,7 +181,7 @@ class OraclizeUtils {
         /**
          * Verify the Oraclize's proof
          */
-        fun verifyProof(proof: ByteArray) : Boolean { return verify(proof) }
+        fun verifyProof(proof: ByteArray, timer: Long? = null) : Boolean { return verify(proof, timer) }
     }
 
 }
