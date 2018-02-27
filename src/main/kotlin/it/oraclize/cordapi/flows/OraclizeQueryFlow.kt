@@ -16,7 +16,7 @@ import net.corda.core.utilities.unwrap
 
 @InitiatingFlow
 @StartableByRPC
-class OraclizeQueryFlow (val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<String>() {
+class OraclizeQueryFlow (val datasource: String, val query: Any, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<String>() {
 
     companion object {
 

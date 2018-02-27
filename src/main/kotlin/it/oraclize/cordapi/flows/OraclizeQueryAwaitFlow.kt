@@ -14,7 +14,7 @@ import net.corda.core.utilities.loggerFor
 
 @InitiatingFlow
 @StartableByRPC
-class OraclizeQueryAwaitFlow(val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<Answer>() {
+class OraclizeQueryAwaitFlow(val datasource: String, val query: Any, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<Answer>() {
 
     companion object {
         object PROCESSING : ProgressTracker.Step("Wait for the results.")
