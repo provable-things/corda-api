@@ -13,6 +13,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.loggerFor
 import net.corda.core.utilities.unwrap
+import java.io.Serializable
 
 @InitiatingFlow
 @StartableByRPC
@@ -35,14 +36,18 @@ class OraclizeQueryFlow (val datasource: String, val query: Any, val proofType: 
     // start OraclizeQueryFlow datasource: identity, query: hello, proofType: 0, delay: 0
     @Suspendable
     override fun call(): String {
+
         val oraclize = serviceHub.identityService
                 .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
         progressTracker.currentStep = PROCESSING
         val session = initiateFlow(oraclize)
 
-        val untrustedString = session.sendAndReceive<String>(Query(datasource, query, delay, proofType))
+        val query = Query(datasource, query, delay, proofType)
+        val queryId = session.sendAndReceive<String>(query).unwrap { it }
 
-        return untrustedString.unwrap { queryID -> queryID }
+        loggerFor<OraclizeQueryFlow>().info("Query id: $queryId")
+
+        return queryId
     }
 }

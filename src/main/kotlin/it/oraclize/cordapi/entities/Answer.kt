@@ -13,6 +13,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 @CordaSerializable
 data class Answer(val queryId: String, val rawValue: Any, val proof: ByteArray? = null) : CommandData {
 
+    companion object {
+        @JvmStatic
+        fun empty() = Answer("", "")
+
+    }
     // Depends on the rawValue
     val type: String
     val value: String
@@ -61,4 +66,6 @@ data class Answer(val queryId: String, val rawValue: Any, val proof: ByteArray? 
 
         return str
     }
+
+    fun isEmpty() = ( value == "" && queryId == "")
 }
