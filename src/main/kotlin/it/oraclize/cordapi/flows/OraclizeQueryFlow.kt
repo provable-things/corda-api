@@ -32,6 +32,7 @@ class OraclizeQueryFlow (val datasource: String, val query: Any, val proofType: 
 
     override val progressTracker = tracker()
 
+    fun console(a: Any) = loggerFor<OraclizeQueryFlow>().info(a.toString())
     // start OraclizeQueryFlow datasource: "URL", query: "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP", proofType: 16, delay: 0
     // start OraclizeQueryFlow datasource: identity, query: hello, proofType: 0, delay: 0
     @Suspendable
@@ -46,7 +47,7 @@ class OraclizeQueryFlow (val datasource: String, val query: Any, val proofType: 
         val query = Query(datasource, query, delay, proofType)
         val queryId = session.sendAndReceive<String>(query).unwrap { it }
 
-        loggerFor<OraclizeQueryFlow>().info("Query id: $queryId")
+        console("Query id: $queryId")
 
         return queryId
     }
