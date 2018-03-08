@@ -13,7 +13,6 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.loggerFor
 import net.corda.core.utilities.unwrap
-import java.io.Serializable
 
 @InitiatingFlow
 @StartableByRPC
