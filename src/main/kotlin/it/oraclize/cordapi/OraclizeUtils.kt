@@ -7,6 +7,7 @@ import com.sun.xml.internal.fastinfoset.algorithm.BooleanEncodingAlgorithm
 import it.oraclize.cordapi.entities.Answer
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FlowException
+import net.corda.core.flows.FlowLogic.Companion.sleep
 
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
@@ -18,6 +19,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.PublicKey
+import java.time.Duration
 import java.util.concurrent.TimeoutException
 import kotlin.concurrent.timer
 
@@ -52,7 +54,6 @@ class OraclizeUtils {
      * verification tool.
      */
     class ProofVerificationTool {
-
 
         private fun console(a: Any) = loggerFor<ProofVerificationTool>().info(a.toString())
 
@@ -113,6 +114,7 @@ class OraclizeUtils {
          * Calls the relative NodeJS function
          * verifying the proof.
          */
+        @Suspendable
         private fun verify(proof: ByteArray, timer: Long? = null) : Boolean {
 
             val bundleFile = setBundleFile().toFile()
@@ -127,6 +129,8 @@ class OraclizeUtils {
                     nodeJS.runtime,
                     { _, parameters: V8Array? ->
                         v8Object = parameters?.getObject(0)
+                        println("callback")
+                        println(v8Object?.getObject("mainProof"))
                         Unit
                     }
             )
@@ -140,40 +144,42 @@ class OraclizeUtils {
                         e.cause)
             }
 
-            val timeToSleep = timer ?: 300000 // 5 minutes
+            val timeToSleep = timer ?: 300000L
 
             val timeout = Thread {
                 try {
+                    println("Started timeout ${Thread.currentThread().name}")
                     Thread.sleep(timeToSleep)
                     throw TimeoutException("ProofVerificationTool: Timeout expired.")
                 } catch (e : InterruptedException) {
-                    console.info("ProofVerificationTool: time expired.")
+                    console.info("ProofVerificationTool: ${Thread.currentThread().name} interrupted.")
                 }
             }
 
+            timeout.start()
 
-            // TL;DR isRunning is false until NodeJS.createNodeJS()
+
+            // [isRunning] is false until NodeJS.createNodeJS()
             // is called or handleMessage is called
             do {
                 nodeJS.handleMessage()
             } while (nodeJS.isRunning)
 
             return try {
-                timeout.start()
+
 
                 while (v8Object == null && timeout.isAlive)
                     continue
 
-                val mainProof = v8Object?.getObject("mainProof") as V8Object // if is null, then
-                                                                             // the timeout has expired
+                val mainProof = v8Object?.getObject("mainProof") as V8Object // if is null then TypeCastException
                 mainProof.getBoolean("isVerified")
 
             } catch (e: TypeCastException) {
-                throw TimeoutException("ProofVerificationTool: time has expired.")
+                val msg = v8Object?.getObject("message") as String
+                throw TimeoutException("ProofVerificationTool: $msg.")
             } finally {
                 if (timeout.isAlive)
                     timeout.interrupt()
-
                 memV8.release()
             }
         }
@@ -181,6 +187,7 @@ class OraclizeUtils {
         /**
          * Verify the Oraclize's proof
          */
+        @Suspendable
         fun verifyProof(proof: ByteArray, timer: Long? = null) : Boolean { return verify(proof, timer) }
     }
 
