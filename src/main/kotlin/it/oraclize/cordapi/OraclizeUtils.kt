@@ -129,8 +129,6 @@ class OraclizeUtils {
                     nodeJS.runtime,
                     { _, parameters: V8Array? ->
                         v8Object = parameters?.getObject(0)
-                        println("callback")
-                        println(v8Object?.getObject("mainProof"))
                         Unit
                     }
             )
@@ -148,7 +146,6 @@ class OraclizeUtils {
 
             val timeout = Thread {
                 try {
-                    println("Started timeout ${Thread.currentThread().name}")
                     Thread.sleep(timeToSleep)
                     throw TimeoutException("ProofVerificationTool: Timeout expired.")
                 } catch (e : InterruptedException) {
@@ -166,8 +163,6 @@ class OraclizeUtils {
             } while (nodeJS.isRunning)
 
             return try {
-
-
                 while (v8Object == null && timeout.isAlive)
                     continue
 
