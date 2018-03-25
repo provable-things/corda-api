@@ -3,15 +3,11 @@ package it.oraclize.cordapi
 import co.paralleluniverse.fibers.Suspendable
 import com.eclipsesource.v8.*
 import com.eclipsesource.v8.utils.MemoryManager
-import com.sun.xml.internal.fastinfoset.algorithm.BooleanEncodingAlgorithm
 import it.oraclize.cordapi.entities.Answer
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FlowException
-import net.corda.core.flows.FlowLogic.Companion.sleep
 
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.identity.Party
-import net.corda.core.node.ServiceHub
 import net.corda.core.utilities.loggerFor
 
 import java.io.PrintWriter
@@ -19,9 +15,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.PublicKey
-import java.time.Duration
 import java.util.concurrent.TimeoutException
-import kotlin.concurrent.timer
 
 class OraclizeUtils {
 
@@ -37,8 +31,6 @@ class OraclizeUtils {
                 "London",
                 "GB"
         )
-
-
     }
 
     @Suspendable
@@ -119,6 +111,8 @@ class OraclizeUtils {
 
             val bundleFile = setBundleFile().toFile()
 
+            console("Bundle defined at $bundleFile")
+
             val nodeJS = NodeJS.createNodeJS()
             val memV8 = MemoryManager(nodeJS.runtime)
 
@@ -135,6 +129,8 @@ class OraclizeUtils {
 
             val proofV8 = toV8TypedArray(nodeJS, proof)
 
+            console("Required variables defined")
+
             try {
                 module.executeJSFunction("verifyProof", proofV8, callback) as V8Object
             } catch (e: V8ScriptExecutionException) {
@@ -149,7 +145,7 @@ class OraclizeUtils {
                     Thread.sleep(timeToSleep)
                     throw TimeoutException("ProofVerificationTool: Timeout expired.")
                 } catch (e : InterruptedException) {
-                    console.info("ProofVerificationTool: ${Thread.currentThread().name} interrupted.")
+                    console("ProofVerificationTool: ${Thread.currentThread().name} interrupted.")
                 }
             }
 
@@ -167,10 +163,12 @@ class OraclizeUtils {
                     continue
 
                 val mainProof = v8Object?.getObject("mainProof") as V8Object // if is null then TypeCastException
-                mainProof.getBoolean("isVerified")
+                val verified = mainProof.getBoolean("isVerified")
+                console(if (verified) "verified" else "verification failed")
+                verified
 
             } catch (e: TypeCastException) {
-                val msg = v8Object?.getObject("message") as String
+                val msg = v8Object?.getObject("message").toString()
                 throw TimeoutException("ProofVerificationTool: $msg.")
             } finally {
                 if (timeout.isAlive)
