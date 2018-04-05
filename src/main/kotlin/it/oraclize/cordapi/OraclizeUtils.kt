@@ -3,6 +3,7 @@ package it.oraclize.cordapi
 import co.paralleluniverse.fibers.Suspendable
 import com.eclipsesource.v8.*
 import com.eclipsesource.v8.utils.MemoryManager
+import com.fasterxml.jackson.databind.ObjectMapper
 import it.oraclize.cordapi.entities.Answer
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FlowException
@@ -107,7 +108,7 @@ class OraclizeUtils {
          * verifying the proof.
          */
         @Suspendable
-        private fun verify(proof: ByteArray, timer: Long? = null) : Boolean {
+        private fun verify(proof: ByteArray, timer: Long? = null) : Boolean  {
 
             val bundleFile = setBundleFile().toFile()
 
@@ -123,7 +124,7 @@ class OraclizeUtils {
                     nodeJS.runtime,
                     { _, parameters: V8Array? ->
                         v8Object = parameters?.getObject(0)
-                        Unit
+                        ""
                     }
             )
 
@@ -142,6 +143,7 @@ class OraclizeUtils {
 
             val timeout = Thread {
                 try {
+
                     Thread.sleep(timeToSleep)
                     throw TimeoutException("ProofVerificationTool: Timeout expired.")
                 } catch (e : InterruptedException) {
