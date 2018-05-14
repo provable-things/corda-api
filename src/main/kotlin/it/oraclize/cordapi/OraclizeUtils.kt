@@ -20,8 +20,6 @@ import java.util.concurrent.TimeoutException
 
 class OraclizeUtils {
 
-
-
     companion object {
         @JvmStatic
         val console = loggerFor<OraclizeUtils>()
@@ -108,7 +106,7 @@ class OraclizeUtils {
          * verifying the proof.
          */
         @Suspendable
-        private fun verify(proof: ByteArray, timer: Long? = null) : Boolean  {
+        private fun verify(proofs: List<ByteArray>, timer: Long? = null): Boolean  {
 
             val bundleFile = setBundleFile().toFile()
 
@@ -120,20 +118,36 @@ class OraclizeUtils {
             val module = nodeJS.require(bundleFile)
 
             var v8Object : V8Object? = null
+            val verifiedProofs = mutableListOf<Boolean>()
+            var i = 0
+
             val callback = V8Function(
                     nodeJS.runtime,
                     { _, parameters: V8Array? ->
                         v8Object = parameters?.getObject(0)
+
+                        val mainProof = v8Object?.getObject("mainProof") as V8Object // if is null then TypeCastException
+                        val isVerified = mainProof.getBoolean("isVerified")
+
+                        val proofNumber = verifiedProofs.size
+                        console(if (isVerified) "${proofNumber} is verified" else "${proofNumber} verification failed")
+                        verifiedProofs.add(isVerified)
                         ""
                     }
             )
 
-            val proofV8 = toV8TypedArray(nodeJS, proof)
+
+            val v8proofs = proofs.map { toV8TypedArray(nodeJS, it) }
 
             console("Required variables defined")
 
             try {
-                module.executeJSFunction("verifyProof", proofV8, callback) as V8Object
+
+                for (v8Proof in v8proofs) {
+                    console("Verifying proof ${i++}")
+                    module.executeJSFunction("verifyProof", v8Proof, callback) as V8Object
+                }
+
             } catch (e: V8ScriptExecutionException) {
                 FlowException("Proof verification failed due to the following error: \n\n ${e.message}",
                         e.cause)
@@ -160,14 +174,12 @@ class OraclizeUtils {
                 nodeJS.handleMessage()
             } while (nodeJS.isRunning)
 
+
             return try {
-                while (v8Object == null && timeout.isAlive)
+                while (v8Object == null && timeout.isAlive && i < proofs.size)
                     continue
 
-                val mainProof = v8Object?.getObject("mainProof") as V8Object // if is null then TypeCastException
-                val verified = mainProof.getBoolean("isVerified")
-                console(if (verified) "verified" else "verification failed")
-                verified
+                verifiedProofs.all { true }
 
             } catch (e: TypeCastException) {
                 val msg = v8Object?.getObject("message").toString()
@@ -183,7 +195,13 @@ class OraclizeUtils {
          * Verify the Oraclize's proof
          */
         @Suspendable
-        fun verifyProof(proof: ByteArray, timer: Long? = null) : Boolean { return verify(proof, timer) }
+        fun verifyProof(proof: ByteArray, timer: Long? = null) : Boolean { return verify(listOf(proof), timer) }
+
+        /**
+         * Verify a list of Oraclize's proofs
+         */
+        @Suspendable
+        fun verifyProofs(proofs: List<ByteArray>, timer: Long? = null) : Boolean { return verify(proofs, timer) }
     }
 
 }
