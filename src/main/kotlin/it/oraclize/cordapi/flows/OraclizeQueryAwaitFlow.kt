@@ -11,10 +11,14 @@ import net.corda.core.flows.StartableByRPC
 import net.corda.core.identity.Party
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.loggerFor
+import java.time.Duration
 
 @InitiatingFlow
 @StartableByRPC
-class OraclizeQueryAwaitFlow(val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<Answer>() {
+class OraclizeQueryAwaitFlow(val datasource: String,
+                             val query: Any,
+                             val proofType: Int = 0,
+                             val delay: Int = 0) : FlowLogic<Answer>() {
 
     companion object {
         object PROCESSING : ProgressTracker.Step("Wait for the results.")
@@ -34,7 +38,7 @@ class OraclizeQueryAwaitFlow(val datasource: String, val query: String, val proo
         val queryId = subFlow(OraclizeQueryFlow(datasource, query, proofType))
 
         while (!subFlow(OraclizeQueryStatusFlow(queryId)))
-            Fiber.sleep(5000)
+            sleep(Duration.ofSeconds(5))
 
         return subFlow(OraclizeQueryResultFlow(queryId))
     }

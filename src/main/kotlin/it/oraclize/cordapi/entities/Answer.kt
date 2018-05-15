@@ -1,5 +1,6 @@
 package it.oraclize.cordapi.entities
 
+import net.corda.client.jackson.JacksonSupport
 import net.corda.core.contracts.CommandData
 import net.corda.core.flows.FlowException
 import net.corda.core.serialization.CordaSerializable
@@ -13,6 +14,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 @CordaSerializable
 data class Answer(val queryId: String, val rawValue: Any, val proof: ByteArray? = null) : CommandData {
 
+    companion object {
+        @JvmStatic
+        fun empty() = Answer("", "")
+
+    }
     // Depends on the rawValue
     val type: String
     val value: String
@@ -49,16 +55,18 @@ data class Answer(val queryId: String, val rawValue: Any, val proof: ByteArray? 
                 .toHashCode()
     }
     override fun toString(): String {
-        var str = "Answer:\n" +
-                "  id: $queryId\n"
+//        var str = "Answer:\n" +
+//                "  id: $queryId\n"
+//
+//        str += "  rawValue: $rawValue"
+//        str += "  value: $value"
+//        str += "  verifyProof: ${Hex.encodeHexString(proof)}\n"
+//
+//
+//        return str
 
-        str += "  rawValue: $rawValue"
-        str += "  value: $value"
-        if (proof != null)
-            str += "  verifyProof: ${Hex.encodeHexString(proof)}\n"
-        else
-            str += "  verifyProof: null\n"
-
-        return str
+        return JacksonSupport.createNonRpcMapper().writeValueAsString(this)
     }
+
+    fun isEmpty() = ( value == "" && queryId == "")
 }

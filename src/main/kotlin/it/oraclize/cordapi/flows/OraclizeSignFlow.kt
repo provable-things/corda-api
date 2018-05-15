@@ -25,7 +25,6 @@ class OraclizeSignFlow(private val ftx: FilteredTransaction) : FlowLogic<Transac
     @Suspendable
     override fun call(): TransactionSignature {
         // TODO(change to a constant ORACLE_NAME see option sample and use serviceHub.firstIdentityByName())
-        console.info("Called!")
         val oracle = serviceHub.identityService
                 .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
         val session = initiateFlow(oracle)
