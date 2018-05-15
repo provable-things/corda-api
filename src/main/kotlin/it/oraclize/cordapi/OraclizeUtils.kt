@@ -3,14 +3,12 @@ package it.oraclize.cordapi
 import co.paralleluniverse.fibers.Suspendable
 import com.eclipsesource.v8.*
 import com.eclipsesource.v8.utils.MemoryManager
-import com.sun.xml.internal.fastinfoset.algorithm.BooleanEncodingAlgorithm
+import com.fasterxml.jackson.databind.ObjectMapper
 import it.oraclize.cordapi.entities.Answer
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FlowException
 
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.identity.Party
-import net.corda.core.node.ServiceHub
 import net.corda.core.utilities.loggerFor
 
 import java.io.PrintWriter
@@ -19,11 +17,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.PublicKey
 import java.util.concurrent.TimeoutException
-import kotlin.concurrent.timer
 
 class OraclizeUtils {
-
-
 
     companion object {
         @JvmStatic
@@ -35,8 +30,6 @@ class OraclizeUtils {
                 "London",
                 "GB"
         )
-
-
     }
 
     @Suspendable
@@ -52,7 +45,6 @@ class OraclizeUtils {
      * verification tool.
      */
     class ProofVerificationTool {
-
 
         private fun console(a: Any) = loggerFor<ProofVerificationTool>().info(a.toString())
 
@@ -113,9 +105,12 @@ class OraclizeUtils {
          * Calls the relative NodeJS function
          * verifying the proof.
          */
-        private fun verify(proof: ByteArray, timer: Long? = null) : Boolean {
+        @Suspendable
+        private fun verify(proofs: List<ByteArray>, timer: Long? = null): Boolean  {
 
             val bundleFile = setBundleFile().toFile()
+
+            console("Bundle defined at $bundleFile")
 
             val nodeJS = NodeJS.createNodeJS()
             val memV8 = MemoryManager(nodeJS.runtime)
@@ -123,57 +118,75 @@ class OraclizeUtils {
             val module = nodeJS.require(bundleFile)
 
             var v8Object : V8Object? = null
+            val verifiedProofs = mutableListOf<Boolean>()
+            var i = 0
+
             val callback = V8Function(
                     nodeJS.runtime,
                     { _, parameters: V8Array? ->
                         v8Object = parameters?.getObject(0)
-                        Unit
+
+                        val mainProof = v8Object?.getObject("mainProof") as V8Object // if is null then TypeCastException
+                        val isVerified = mainProof.getBoolean("isVerified")
+
+                        val proofNumber = verifiedProofs.size
+                        console(if (isVerified) "${proofNumber} is verified" else "${proofNumber} verification failed")
+                        verifiedProofs.add(isVerified)
+                        ""
                     }
             )
 
-            val proofV8 = toV8TypedArray(nodeJS, proof)
+
+            val v8proofs = proofs.map { toV8TypedArray(nodeJS, it) }
+
+            console("Required variables defined")
 
             try {
-                module.executeJSFunction("verifyProof", proofV8, callback) as V8Object
+
+                for (v8Proof in v8proofs) {
+                    console("Verifying proof ${i++}")
+                    module.executeJSFunction("verifyProof", v8Proof, callback) as V8Object
+                }
+
             } catch (e: V8ScriptExecutionException) {
                 FlowException("Proof verification failed due to the following error: \n\n ${e.message}",
                         e.cause)
             }
 
-            val timeToSleep = timer ?: 300000 // 5 minutes
+            val timeToSleep = timer ?: 300000L
 
             val timeout = Thread {
                 try {
+
                     Thread.sleep(timeToSleep)
                     throw TimeoutException("ProofVerificationTool: Timeout expired.")
                 } catch (e : InterruptedException) {
-                    console.info("ProofVerificationTool: time expired.")
+                    console("ProofVerificationTool: ${Thread.currentThread().name} interrupted.")
                 }
             }
 
+            timeout.start()
 
-            // TL;DR isRunning is false until NodeJS.createNodeJS()
+
+            // [isRunning] is false until NodeJS.createNodeJS()
             // is called or handleMessage is called
             do {
                 nodeJS.handleMessage()
             } while (nodeJS.isRunning)
 
-            return try {
-                timeout.start()
 
-                while (v8Object == null && timeout.isAlive)
+            return try {
+                while (v8Object == null && timeout.isAlive && i < proofs.size)
                     continue
 
-                val mainProof = v8Object?.getObject("mainProof") as V8Object // if is null, then
-                                                                             // the timeout has expired
-                mainProof.getBoolean("isVerified")
+                verifiedProofs.all { true }
 
             } catch (e: TypeCastException) {
-                throw TimeoutException("ProofVerificationTool: time has expired.")
+                val msg = v8Object?.getObject("message").toString()
+                throw TimeoutException("ProofVerificationTool: $msg.")
             } finally {
                 if (timeout.isAlive)
                     timeout.interrupt()
-
                 memV8.release()
             }
         }
@@ -181,7 +194,14 @@ class OraclizeUtils {
         /**
          * Verify the Oraclize's proof
          */
-        fun verifyProof(proof: ByteArray, timer: Long? = null) : Boolean { return verify(proof, timer) }
+        @Suspendable
+        fun verifyProof(proof: ByteArray, timer: Long? = null) : Boolean { return verify(listOf(proof), timer) }
+
+        /**
+         * Verify a list of Oraclize's proofs
+         */
+        @Suspendable
+        fun verifyProofs(proofs: List<ByteArray>, timer: Long? = null) : Boolean { return verify(proofs, timer) }
     }
 
 }

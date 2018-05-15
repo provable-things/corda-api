@@ -12,4 +12,19 @@ yarn browserify-node
 cd ..
 cd ..
 
-cp ./libs/proof-verification-tool/bundleNode.js ./src/main/resources/pvtBundle.js
+cp ./libs/proof-verification-tool/bundleNode.js ./src/main/resources/
+
+#
+# Needed when the proof-verification-tool is updated
+#
+
+if [ -e ../pvtBundle.js ]; then
+    rm ../pvtBundle.js
+    echo ../pvtBundle.js successfully removed.
+fi
+
+if [ -e ./pvtBundle.js ]; then
+    rm ./pvtBundle.js
+    echo ./pvtBundle.js successfully removed.
+fi
+
