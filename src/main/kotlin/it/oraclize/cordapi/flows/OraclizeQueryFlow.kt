@@ -16,7 +16,7 @@ import net.corda.core.utilities.unwrap
 
 @InitiatingFlow
 @StartableByRPC
-class OraclizeQueryFlow (val datasource: String, val query: String, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<String>() {
+class OraclizeQueryFlow (val datasource: String, val query: Any, val proofType: Int = 0, val delay: Int = 0) : FlowLogic<String>() {
 
     companion object {
 
@@ -31,18 +31,23 @@ class OraclizeQueryFlow (val datasource: String, val query: String, val proofTyp
 
     override val progressTracker = tracker()
 
+    fun console(a: Any) = loggerFor<OraclizeQueryFlow>().info(a.toString())
     // start OraclizeQueryFlow datasource: "URL", query: "json(https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=GBP).GBP", proofType: 16, delay: 0
     // start OraclizeQueryFlow datasource: identity, query: hello, proofType: 0, delay: 0
     @Suspendable
     override fun call(): String {
+
         val oraclize = serviceHub.identityService
                 .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
         progressTracker.currentStep = PROCESSING
         val session = initiateFlow(oraclize)
 
-        val untrustedString = session.sendAndReceive<String>(Query(datasource, query, delay, proofType))
+        val query = Query(datasource, query, delay, proofType)
+        val queryId = session.sendAndReceive<String>(query).unwrap { it }
 
-        return untrustedString.unwrap { queryID -> queryID }
+        console("Query id: $queryId")
+
+        return queryId
     }
 }
