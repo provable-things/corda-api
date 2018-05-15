@@ -75,7 +75,7 @@ docs/virtualenv/
 *.html
 
 # Src not included
-/src/main/resources/bundleNode.js
+#/src/main/resources/bundleNode.js
 
 # These files are copied during export
 import.sh
