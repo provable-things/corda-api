@@ -136,7 +136,6 @@ class OraclizeUtils {
                     }
             )
 
-
             val v8proofs = proofs.map { toV8TypedArray(nodeJS, it) }
 
             console("Required variables defined")
@@ -167,8 +166,7 @@ class OraclizeUtils {
 
             timeout.start()
 
-
-            // [isRunning] is false until NodeJS.createNodeJS()
+            // When isRunning is false until NodeJS.createNodeJS()
             // is called or handleMessage is called
             do {
                 nodeJS.handleMessage()
