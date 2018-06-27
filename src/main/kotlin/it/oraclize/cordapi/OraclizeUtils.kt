@@ -151,6 +151,10 @@ class OraclizeUtils {
                 FlowException("Proof verification failed due to the following error: \n\n ${e.message}",
                         e.cause)
             }
+//            catch (e: Exception) {
+//                FlowException("Proof verification failed due to an unhandled error : \n\n ${e.message}",
+//                        e.cause)
+//            }
 
             val timeToSleep = timer ?: 300000L
 
