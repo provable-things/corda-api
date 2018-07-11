@@ -200,7 +200,7 @@ class OraclizeUtils {
          * Verify the Oraclize's proof
          */
         @Suspendable
-        fun verifyProof(proof: ByteArray, timer: Long? = null) = verify(listOf(proof), timer).also { println("ciao") }
+        fun verifyProof(proof: ByteArray, timer: Long? = null) = verify(listOf(proof), timer)
 
 
         /**
