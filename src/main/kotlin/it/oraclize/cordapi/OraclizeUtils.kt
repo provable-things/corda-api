@@ -30,6 +30,7 @@ class OraclizeUtils {
                 "London",
                 "GB"
         )
+
     }
 
     @Suspendable
@@ -106,13 +107,16 @@ class OraclizeUtils {
          * verifying the proof.
          */
         @Suspendable
-        private fun verify(proofs: List<ByteArray>, timer: Long? = null): Boolean  {
+        private  fun verify(proofs: List<ByteArray>, timer: Long? = null): Boolean  {
 
             val bundleFile = setBundleFile().toFile()
 
             console("Bundle defined at $bundleFile")
 
+            // TODO think to use the nodeJS.runtime.locker for thread safety
+
             val nodeJS = NodeJS.createNodeJS()
+
             val memV8 = MemoryManager(nodeJS.runtime)
 
             val module = nodeJS.require(bundleFile)
@@ -189,19 +193,22 @@ class OraclizeUtils {
                     timeout.interrupt()
                 memV8.release()
             }
+
         }
 
         /**
          * Verify the Oraclize's proof
          */
         @Suspendable
-        fun verifyProof(proof: ByteArray, timer: Long? = null) : Boolean { return verify(listOf(proof), timer) }
+        fun verifyProof(proof: ByteArray, timer: Long? = null) = verify(listOf(proof), timer)
+
 
         /**
          * Verify a list of Oraclize's proofs
          */
         @Suspendable
-        fun verifyProofs(proofs: List<ByteArray>, timer: Long? = null) : Boolean { return verify(proofs, timer) }
+        fun verifyProofs(proofs: List<ByteArray>, timer: Long? = null) = verify(proofs, timer)
+
     }
 
 }

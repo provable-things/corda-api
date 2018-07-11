@@ -31,10 +31,6 @@ class OraclizeQueryAwaitFlow(val datasource: String,
 
     @Suspendable
     override fun call(): Answer {
-
-        val oracle = serviceHub.identityService
-                .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
-
         val queryId = subFlow(OraclizeQueryFlow(datasource, query, proofType))
 
         while (!subFlow(OraclizeQueryStatusFlow(queryId)))
