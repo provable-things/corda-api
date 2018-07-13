@@ -3,7 +3,6 @@ package it.oraclize.cordapi
 import co.paralleluniverse.fibers.Suspendable
 import com.eclipsesource.v8.*
 import com.eclipsesource.v8.utils.MemoryManager
-import com.fasterxml.jackson.databind.ObjectMapper
 import it.oraclize.cordapi.entities.Answer
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FlowException
@@ -30,6 +29,7 @@ class OraclizeUtils {
                 "London",
                 "GB"
         )
+
     }
 
     @Suspendable
@@ -106,13 +106,16 @@ class OraclizeUtils {
          * verifying the proof.
          */
         @Suspendable
-        private fun verify(proofs: List<ByteArray>, timer: Long? = null): Boolean  {
+        private  fun verify(proofs: List<ByteArray>, timer: Long? = null): Boolean  {
 
             val bundleFile = setBundleFile().toFile()
 
             console("Bundle defined at $bundleFile")
 
+            // TODO think to use the nodeJS.runtime.locker for thread safety
+
             val nodeJS = NodeJS.createNodeJS()
+
             val memV8 = MemoryManager(nodeJS.runtime)
 
             val module = nodeJS.require(bundleFile)
@@ -136,6 +139,7 @@ class OraclizeUtils {
                     }
             )
 
+
             val v8proofs = proofs.map { toV8TypedArray(nodeJS, it) }
 
             console("Required variables defined")
@@ -151,10 +155,6 @@ class OraclizeUtils {
                 FlowException("Proof verification failed due to the following error: \n\n ${e.message}",
                         e.cause)
             }
-//            catch (e: Exception) {
-//                FlowException("Proof verification failed due to an unhandled error : \n\n ${e.message}",
-//                        e.cause)
-//            }
 
             val timeToSleep = timer ?: 300000L
 
@@ -170,7 +170,8 @@ class OraclizeUtils {
 
             timeout.start()
 
-            // When isRunning is false until NodeJS.createNodeJS()
+
+            // [isRunning] is false until NodeJS.createNodeJS()
             // is called or handleMessage is called
             do {
                 nodeJS.handleMessage()
@@ -191,19 +192,22 @@ class OraclizeUtils {
                     timeout.interrupt()
                 memV8.release()
             }
+
         }
 
         /**
          * Verify the Oraclize's proof
          */
         @Suspendable
-        fun verifyProof(proof: ByteArray, timer: Long? = null) : Boolean { return verify(listOf(proof), timer) }
+        fun verifyProof(proof: ByteArray, timer: Long? = null) = verify(listOf(proof), timer)
+
 
         /**
          * Verify a list of Oraclize's proofs
          */
         @Suspendable
-        fun verifyProofs(proofs: List<ByteArray>, timer: Long? = null) : Boolean { return verify(proofs, timer) }
+        fun verifyProofs(proofs: List<ByteArray>, timer: Long? = null) = verify(proofs, timer)
+
     }
 
 }

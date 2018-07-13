@@ -22,8 +22,8 @@ data class Query(
         @get:JsonProperty("proof_type") val proofType: Int = 0) {
 
     // Constants
-//    @get:JsonIgnore val CONTEXT_NAME = "corda_r3_testnet_1"
-    @get:JsonIgnore val CONTEXT_NAME = ""
+    @get:JsonIgnore val CONTEXT_NAME = "corda_r3_testnet_1"
+//    @get:JsonIgnore val CONTEXT_NAME = ""
     var context : Any? = null
 
     fun addContext(session: FlowSession, serviceHub: ServiceHub) {
