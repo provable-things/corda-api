@@ -10,6 +10,7 @@ import it.oraclize.cordapi.entities.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndContract
 import net.corda.core.flows.*
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -48,7 +49,9 @@ object Example {
             val oracle = serviceHub.identityService
                     .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
-            val notary = serviceHub.networkMapCache.notaryIdentities.first()
+            val notary = serviceHub.networkMapCache.getNotary(CordaX500Name("Controller", "London", "GB"))!!
+
+            console.info("is notary = ${serviceHub.networkMapCache.isNotary(notary)}")
 
             progressTracker.currentStep = QUERYING_ORACLE
 
