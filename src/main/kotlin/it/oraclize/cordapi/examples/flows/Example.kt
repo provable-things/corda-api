@@ -49,9 +49,7 @@ object Example {
             val oracle = serviceHub.identityService
                     .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
-            val notary = serviceHub.networkMapCache.getNotary(CordaX500Name("Controller", "London", "GB"))!!
-
-            console.info("is notary = ${serviceHub.networkMapCache.isNotary(notary)}")
+            val notary = serviceHub.networkMapCache.getNotary(CordaX500Name("Notary", "London", "GB"))!!
 
             progressTracker.currentStep = QUERYING_ORACLE
 
