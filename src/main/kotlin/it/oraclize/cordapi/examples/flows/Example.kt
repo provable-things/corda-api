@@ -10,6 +10,7 @@ import it.oraclize.cordapi.entities.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndContract
 import net.corda.core.flows.*
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -48,7 +49,7 @@ object Example {
             val oracle = serviceHub.identityService
                     .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
 
-            val notary = serviceHub.networkMapCache.notaryIdentities.first()
+            val notary = serviceHub.networkMapCache.getNotary(CordaX500Name("Notary", "London", "GB"))!!
 
             progressTracker.currentStep = QUERYING_ORACLE
 
@@ -58,21 +59,16 @@ object Example {
                     proofType = ProofType.TLSNOTARY
             ))
 
-//            val answer = subFlow(OraclizeQueryAwaitFlow(
-//                    datasource = "URL",
-//                    query = "https://arxiv.org/pdf/1704.02781.pdf",
-//                    proofType = ProofType.TLSNOTARY
-//            ))
-
             console.info(answer.toString())
 
             progressTracker.currentStep = RESULTS_RECEIVED
 
-            console.info("Oraclize: ${answer.queryId} proccessed")
+            console.info("Oraclize: ${answer.queryId} processed")
 
             progressTracker.currentStep = PROOF
             val proofVerificationTool = OraclizeUtils.ProofVerificationTool()
-            proofVerificationTool.verifyProof(answer.proof as ByteArray)
+
+            require(proofVerificationTool.verifyProof(answer.proof as ByteArray))
 
             progressTracker.currentStep = CREATING_TX
             // States + commands + contract = raw transaction <- it can be modified
