@@ -3,7 +3,6 @@ package it.oraclize.cordapi
 import co.paralleluniverse.fibers.Suspendable
 import com.eclipsesource.v8.*
 import com.eclipsesource.v8.utils.MemoryManager
-import com.fasterxml.jackson.databind.ObjectMapper
 import it.oraclize.cordapi.entities.Answer
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FlowException
