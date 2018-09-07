@@ -2,7 +2,6 @@ package it.oraclize.cordapi.flows
 
 import it.oraclize.cordapi.OraclizeUtils
 import it.oraclize.cordapi.entities.Answer
-import it.oraclize.cordapi.entities.Query
 
 import co.paralleluniverse.fibers.Suspendable
 
@@ -11,13 +10,12 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.Party
 import net.corda.core.utilities.unwrap
 
-@InitiatingFlow
+@InitiatingFlow(version = 1)
 class OraclizeQueryResultFlow (val queryId : String) : FlowLogic<Answer>() {
 
     @Suspendable
     override fun call(): Answer {
-        val oraclize = serviceHub.identityService
-                .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
+        val oraclize = OraclizeUtils.getPartyNode(serviceHub)
 
         val session = initiateFlow(oraclize)
 
