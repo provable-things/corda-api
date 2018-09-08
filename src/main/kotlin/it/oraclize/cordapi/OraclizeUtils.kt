@@ -8,6 +8,8 @@ import net.corda.core.contracts.Command
 import net.corda.core.flows.FlowException
 
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.identity.Party
+import net.corda.core.node.ServiceHub
 import net.corda.core.utilities.loggerFor
 
 import java.io.PrintWriter
@@ -24,12 +26,28 @@ class OraclizeUtils {
         val console = loggerFor<OraclizeUtils>()
 
         @JvmStatic
-        fun getNodeName() = CordaX500Name(
-                "Oraclize",
-                "London",
-                "GB"
-        )
+        fun getPartyNode(service: ServiceHub) : Party {
+            val oraclizeLegalName = CordaX500Name(
+                    "Oraclize",
+                    "London",
+                    "GB"
+            )
 
+            val oraclizeTestnetName = CordaX500Name(
+                    "Cb37ca285-285f-4133-b41f-25bc2a1a7717",
+                    "London",
+                    "GB"
+            )
+
+            val peer = service.networkMapCache.getPeerByLegalName(oraclizeLegalName) ?:
+                service.networkMapCache.getPeerByLegalName(oraclizeTestnetName)
+
+            return if (peer == null)
+                throw FlowException(
+                        "Unable to reach Oraclize: are you connected testnet https://testnet.corda.network/"
+                )
+            else peer
+        }
     }
 
     @Suspendable
