@@ -9,7 +9,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
 /**
- * Wrap the rawValue given by the Oracle
+ * Enclose an Oraclize answer
+ *
+ * @property queryId id of the query performed
+ * @property rawValue binary or string representation of the result
+ * @property proof hex string used as authenticity proof
+ *
+ * @return a [CommandData] enclosing the answer
  */
 @CordaSerializable
 data class Answer(val queryId: String, val rawValue: Any, val proof: ByteArray? = null) : CommandData {
@@ -54,19 +60,7 @@ data class Answer(val queryId: String, val rawValue: Any, val proof: ByteArray? 
                 .append(proof)
                 .toHashCode()
     }
-    override fun toString(): String {
-//        var str = "Answer:\n" +
-//                "  id: $queryId\n"
-//
-//        str += "  rawValue: $rawValue"
-//        str += "  value: $value"
-//        str += "  verifyProof: ${Hex.encodeHexString(proof)}\n"
-//
-//
-//        return str
-
-        return JacksonSupport.createNonRpcMapper().writeValueAsString(this)
-    }
+    override fun toString(): String = JacksonSupport.createNonRpcMapper().writeValueAsString(this)
 
     fun isEmpty() = ( value == "" && queryId == "")
 }
