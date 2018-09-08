@@ -53,7 +53,7 @@ Run your CordApp and type in the **`crash`** shell the following:
 If you want to check the transaction stored, type:
 
 ```bash
->>> run vaultQuery contractStateType: it.oraclize.cordapi.examples.states.CashOwningState
+>>> run vaultQuery contractStateType: it.oraclize.cordapi.example.states.DummyState
 ```
 
 #### Want to use Oraclize as a dependency?

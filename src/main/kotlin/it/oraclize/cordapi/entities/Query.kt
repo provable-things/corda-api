@@ -12,7 +12,12 @@ import net.corda.core.utilities.toBase58String
 import org.apache.commons.codec.binary.Hex
 
 /**
- * Represents an Oraclize query
+ * Represents an Oraclize query.
+ *
+ * @property datasource source type, could be [URL, Random, WolframAlpha, IPFS, computation]
+ * @property query query to send (could be "Weather in London" using WolframAlpha ds)
+ * @property proofType check [it.oraclize.cordapi.entities.ProofType]
+ * @property delay milliseconds to wait before executing the query
  */
 @CordaSerializable
 data class Query(

@@ -15,7 +15,7 @@ import net.corda.core.utilities.unwrap
 /**
  * Starts the flow to sign the filtered transaction.
  */
-@InitiatingFlow
+@InitiatingFlow(version = 1)
 class OraclizeSignFlow(private val ftx: FilteredTransaction) : FlowLogic<TransactionSignature>() {
     companion object {
         @JvmStatic
@@ -25,8 +25,7 @@ class OraclizeSignFlow(private val ftx: FilteredTransaction) : FlowLogic<Transac
     @Suspendable
     override fun call(): TransactionSignature {
         // TODO(change to a constant ORACLE_NAME see option sample and use serviceHub.firstIdentityByName())
-        val oracle = serviceHub.identityService
-                .wellKnownPartyFromX500Name(OraclizeUtils.getNodeName()) as Party
+        val oracle = OraclizeUtils.getPartyNode(serviceHub)
         val session = initiateFlow(oracle)
 
         val untrustedData: UntrustworthyData<TransactionSignature> = session.sendAndReceive(ftx)
