@@ -26,20 +26,28 @@ class OraclizeQueryAwaitFlow(val dataSource: String,
                              val delay: Int = 0) : FlowLogic<Answer>() {
 
     companion object {
-        object PROCESSING : ProgressTracker.Step("Wait for the results.")
+        object QUERY : ProgressTracker.Step("Querying Oraclize")
+        object STATUS : ProgressTracker.Step("Waiting for the result ")
+        object RESULT : ProgressTracker.Step("Giving back the result")
 
         @JvmStatic
-        fun tracker() = ProgressTracker(PROCESSING)
+        fun tracker() = ProgressTracker(QUERY, STATUS, RESULT)
     }
 
     override val progressTracker = tracker()
 
     @Suspendable
     override fun call(): Answer {
+        progressTracker.currentStep = QUERY
+
         val queryId = subFlow(OraclizeQueryFlow(dataSource, query, proofType))
+
+        progressTracker.currentStep = STATUS
 
         while (!subFlow(OraclizeQueryStatusFlow(queryId)))
             sleep(Duration.ofSeconds(5))
+
+        progressTracker.currentStep = RESULT
 
         return subFlow(OraclizeQueryResultFlow(queryId))
     }
