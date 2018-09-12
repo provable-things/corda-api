@@ -30,7 +30,7 @@ to export the jar produced in a machine with a different operating system.
 If the `-Pos` argument is not given, the local architecture is automatically detected as well as the relative
 J2V8 dependency.
 
-#### Execute the example on TestNet:
+### Use the service in a cordapp
 
  1. Join testnet as explained [here](https://docs.corda.net/head/corda-testnet-intro.html)
  2. Add the following dependencies to your cordapp `build.gradle` file
