@@ -1,45 +1,60 @@
-if (!project.hasProperty('corda-integration')) { 
-    buildscript {
-        println 'Running provable-corda-api buildscript'
-        ext {
-            corda_release_group = 'net.corda'
-            corda_release_version = '4.1'
-            corda_gradle_plugins_version = '4.0.45'
-            kotlin_version = '1.2.71'
-            junit_version = '4.12'
-            quasar_version = '0.7.10'
-            spring_boot_version = '2.0.2.RELEASE'
-            spring_boot_gradle_plugin_version = '2.0.2.RELEASE'
-            slf4j_version = '1.7.25'
-            log4j_version = '2.11.2'
-            corda_platform_version = '4'.toInteger()
-        }
+buildscript {
+    ext {
+        corda_release_group = 'net.corda'
+        corda_release_version = '4.1'
+        corda_gradle_plugins_version = '4.0.45'
+        kotlin_version = '1.2.71'
+        junit_version = '4.12'
+        quasar_version = '0.7.10'
+        spring_boot_version = '2.0.2.RELEASE'
+        spring_boot_gradle_plugin_version = '2.0.2.RELEASE'
+        slf4j_version = '1.7.25'
+        log4j_version = '2.11.2'
+        corda_platform_version = '4'.toInteger()
+    }
 
-        repositories {
-            mavenLocal()
-            mavenCentral()
-            jcenter()
-            maven { url 'https://software.r3.com/artifactory/corda' }    
-        }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'https://software.r3.com/artifactory/corda' }    
+    }
 
-        dependencies {
-            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-            classpath "net.corda.plugins:cordapp:$corda_gradle_plugins_version"
-            classpath "net.corda.plugins:cordformation:$corda_gradle_plugins_version"
-            classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
-        }
-
-    }   
-} // end if
-
-
-jar {
-    // This makes the JAR's SHA-256 hash repeatable.
-    preserveFileTimestamps = false
-    reproducibleFileOrder = true
-    baseName 'provable-corda-api'    
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "net.corda.plugins:cordapp:$corda_gradle_plugins_version"
+        classpath "net.corda.plugins:cordformation:$corda_gradle_plugins_version"
+        classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
+    }
 }
 
+allprojects {
+    apply plugin: 'kotlin'
+
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+        maven { url 'https://software.r3.com/artifactory/corda' }
+        maven { url 'https://jitpack.io' }
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            languageVersion = "1.2"
+            apiVersion = "1.2"
+            jvmTarget = "1.8"
+            javaParameters = true   // Useful for reflection.
+        }
+    }
+
+    jar {
+        // This makes the JAR's SHA-256 hash repeatable.
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
+        baseName 'provable-corda-api'
+    }
+}
 apply plugin: 'net.corda.plugins.cordapp'
 
 cordapp {
