@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2015-2016 Oraclize SRL
-Copyright (c) 2016 Oraclize LTD
+Copyright (c) 2015-2016 Provable SRL
+Copyright (c) 2016 Provable LTD
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -18,10 +18,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-package it.oraclize.cordapi.flows
+package xyz.provable.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import it.oraclize.cordapi.entities.Answer
+import xyz.provable.states.Answer
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
@@ -33,20 +33,20 @@ import java.time.Duration
  *
  * @param dataSource source type, could be [URL, Random, WolframAlpha, IPFS, computation]
  * @param query query to send (could be "Weather in London" using WolframAlpha ds)
- * @param proofType @see [it.oraclize.cordapi.entities.ProofType]
+ * @param proofType @see [xyz.provable.states.ProofType]
  * @param delay milliseconds to wait before executing the query
  *
  * @return an [Answer]
  */
 @StartableByRPC
-@InitiatingFlow(version = 1)
-class OraclizeQueryAwaitFlow(val dataSource: String,
+@InitiatingFlow
+class ProvableQueryAwaitFlow(val dataSource: String,
                              val query: Any,
                              val proofType: Int = 0,
                              val delay: Int = 0) : FlowLogic<Answer>() {
 
     companion object {
-        object QUERY : ProgressTracker.Step("Querying Oraclize")
+        object QUERY : ProgressTracker.Step("Querying Provable")
         object STATUS : ProgressTracker.Step("Waiting for the result ")
         object RESULT : ProgressTracker.Step("Giving back the result")
 
@@ -60,15 +60,15 @@ class OraclizeQueryAwaitFlow(val dataSource: String,
     override fun call(): Answer {
         progressTracker.currentStep = QUERY
 
-        val queryId = subFlow(OraclizeQueryFlow(dataSource, query, proofType))
+        val queryId = subFlow(ProvableQueryFlow(dataSource, query, proofType))
 
         progressTracker.currentStep = STATUS
 
-        while (!subFlow(OraclizeQueryStatusFlow(queryId)))
+        while (!subFlow(ProvableQueryStatusFlow(queryId)))
             sleep(Duration.ofSeconds(5))
 
         progressTracker.currentStep = RESULT
 
-        return subFlow(OraclizeQueryResultFlow(queryId))
+        return subFlow(ProvableQueryResultFlow(queryId))
     }
 }
