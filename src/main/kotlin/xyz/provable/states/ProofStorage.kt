@@ -1,7 +1,6 @@
-
 /*
-Copyright (c) 2015-2016 Oraclize SRL
-Copyright (c) 2016 Oraclize LTD
+Copyright (c) 2015-2016 Provable SRL
+Copyright (c) 2016 Provable LTD
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -18,16 +17,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+package xyz.provable.states
 
-package it.oraclize.cordapi.entities
-
-class ProofType {
+class ProofStorage {
     companion object {
         val NONE = 0x00
-        val TLSNOTARY = 0x10
-        val ANDROID = 0x20
-        val LEDGER = 0x30
-        val NATIVE = 0xF0
+        val IPFS = 0x01
     }
-
 }

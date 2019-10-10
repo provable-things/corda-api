@@ -151,7 +151,7 @@ function verifyPayload(jwsPayload, response, requestID, signature, apkDigest, ap
   if (jwsPayloadJSON.nonce !== nonce.toString('base64')) {
     throw new Error('verifyPayload failed: unexpected nonce');
   }
-  if (jwsPayloadJSON.apkPackageName !== 'it.oraclize.androidproof') {
+  if (jwsPayloadJSON.apkPackageName !== 'xyz.provable.androidproof') {
     throw new Error('verifyPayload failed: unexpected package name');
   }
   if (jwsPayloadJSON.apkDigestSha256 !== apkDigest) {
@@ -250,7 +250,7 @@ function verifyAttestationParams(leafCert) {
   if (String(keyInfo.keymasterSecurityLevel) !== 'TrustedEnvironment') {
     throw new Error('verifyAttestationParams failed: keymasterSecurityLevel mismatch');
   }
-  if (String(keyInfo.attestationChallenge) !== 'Oraclize') {
+  if (String(keyInfo.attestationChallenge) !== 'Provable') {
     throw new Error('verifyAttestationParams failed: attestationChallenge value mismatch');
   }
   if (String(keyInfo.teeEnforced.purpose) !== '2') {

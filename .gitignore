@@ -78,5 +78,5 @@ docs/virtualenv/
 #/src/main/resources/bundleNode.js
 
 # These files are copied during export
-import.sh
-update_branches.sh
+import
+update_branches

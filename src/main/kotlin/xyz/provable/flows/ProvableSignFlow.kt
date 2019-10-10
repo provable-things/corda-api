@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2015-2016 Oraclize SRL
-Copyright (c) 2016 Oraclize LTD
+Copyright (c) 2015-2016 Provable SRL
+Copyright (c) 2016 Provable LTD
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -18,29 +18,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-package it.oraclize.cordapi.flows
+package xyz.provable.flows
 
-import it.oraclize.cordapi.OraclizeUtils
-import it.oraclize.cordapi.entities.Answer
+import xyz.provable.utils.ProvableUtils
 
 import co.paralleluniverse.fibers.Suspendable
-
-import net.corda.core.flows.InitiatingFlow
+import net.corda.core.crypto.TransactionSignature
 import net.corda.core.flows.FlowLogic
-import net.corda.core.identity.Party
+import net.corda.core.flows.InitiatingFlow
+import net.corda.core.transactions.FilteredTransaction
+import net.corda.core.utilities.UntrustworthyData
+import net.corda.core.utilities.loggerFor
 import net.corda.core.utilities.unwrap
 
-@InitiatingFlow(version = 1)
-class OraclizeQueryResultFlow (val queryId : String) : FlowLogic<Answer>() {
+/**
+ * Starts the flow to sign the filtered transaction.
+ */
+@InitiatingFlow
+class ProvableSignFlow(private val ftx: FilteredTransaction) : FlowLogic<TransactionSignature>() {
+    companion object {
+        @JvmStatic
+        val console = loggerFor<ProvableSignFlow>()
+    }
 
     @Suspendable
-    override fun call(): Answer {
-        val oraclize = OraclizeUtils.getPartyNode(serviceHub)
+    override fun call(): TransactionSignature {
+        // TODO(change to a constant ORACLE_NAME see option sample and
+        //  use serviceHub.firstIdentityByName())
+        val oracle = ProvableUtils.getPartyNode(serviceHub)
+        val session = initiateFlow(oracle)
 
-        val session = initiateFlow(oraclize)
+        val untrustedData: UntrustworthyData<TransactionSignature> = session.sendAndReceive(ftx)
 
-        val untrustedAnswer = session.sendAndReceive<Answer>(queryId)
-
-        return untrustedAnswer.unwrap { answer -> answer }
+        return untrustedData.unwrap { tx ->
+            // TODO(additional checks?)
+            tx
+        }
     }
 }

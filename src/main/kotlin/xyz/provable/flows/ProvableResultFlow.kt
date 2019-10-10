@@ -1,7 +1,6 @@
-
 /*
-Copyright (c) 2015-2016 Oraclize SRL
-Copyright (c) 2016 Oraclize LTD
+Copyright (c) 2015-2016 Provable SRL
+Copyright (c) 2016 Provable LTD
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -19,12 +18,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-package it.oraclize.cordapi.entities
+package xyz.provable.flows
 
-class ProofStorage {
-    companion object {
-        val NONE = 0x00
-        val IPFS = 0x01
+import net.corda.core.flows.InitiatingFlow
+import net.corda.core.flows.FlowLogic
+import net.corda.core.utilities.unwrap
+import co.paralleluniverse.fibers.Suspendable
+
+import xyz.provable.utils.ProvableUtils
+import xyz.provable.states.Answer
+
+@InitiatingFlow
+class ProvableQueryResultFlow (val queryId : String) : FlowLogic<Answer>() {
+    @Suspendable
+    override fun call(): Answer {
+        val provable = ProvableUtils.getPartyNode(serviceHub)
+        val session = initiateFlow(provable)
+        val untrustedAnswer = session.sendAndReceive<Answer>(queryId)
+
+        return untrustedAnswer.unwrap { answer -> answer }
     }
-
 }
