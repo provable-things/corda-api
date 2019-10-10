@@ -1,7 +1,6 @@
-
 /*
-Copyright (c) 2015-2016 Oraclize SRL
-Copyright (c) 2016 Oraclize LTD
+Copyright (c) 2015-2016 Provable SRL
+Copyright (c) 2016 Provable LTD
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -19,7 +18,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-package it.oraclize.cordapi.entities
+package xyz.provable.states
 
 import net.corda.client.jackson.JacksonSupport
 import net.corda.core.contracts.CommandData
@@ -30,7 +29,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
 /**
- * Enclose an Oraclize answer
+ * Enclose an Provable answer
  *
  * @property queryId id of the query performed
  * @property rawValue binary or string representation of the result
@@ -39,28 +38,34 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
  * @return a [CommandData] enclosing the answer
  */
 @CordaSerializable
-data class Answer(val queryId: String, val rawValue: Any, val proof: ByteArray? = null) : CommandData {
-
+data class Answer(val queryId: String,
+                  val rawValue: Any,
+                  val proof: ByteArray? = null) : CommandData {
     companion object {
         @JvmStatic
         fun empty() = Answer("", "")
-
     }
+
     // Depends on the rawValue
     val type: String
     val value: String
 
     init {
-        if (rawValue is ByteArray) {
-            type = "hex"
-            value = Hex.encodeHexString(rawValue)
+        when (rawValue) {
+            is ByteArray -> {
+                type = "hex"
+                value = Hex.encodeHexString((rawValue))
+            }
+
+            is String -> {
+                type = "str"
+                value = rawValue
+            }
+
+            else -> throw FlowException(
+                    "The value given must be a ByteArray or a String."
+            )
         }
-        else if (rawValue is String) {
-            type = "str"
-            value = rawValue
-        }
-        else
-            throw FlowException("The value given must be a ByteArray or a String.")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -81,7 +86,9 @@ data class Answer(val queryId: String, val rawValue: Any, val proof: ByteArray? 
                 .append(proof)
                 .toHashCode()
     }
-    override fun toString(): String = JacksonSupport.createNonRpcMapper().writeValueAsString(this)
+    override fun toString(): String = JacksonSupport
+            .createNonRpcMapper()
+            .writeValueAsString(this)
 
     fun isEmpty() = ( value == "" && queryId == "")
 }

@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2015-2016 Oraclize SRL
-Copyright (c) 2016 Oraclize LTD
+Copyright (c) 2015-2016 Provable SRL
+Copyright (c) 2016 Provable LTD
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -18,26 +18,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-package it.oraclize.cordapi.flows
+package xyz.provable.states
 
-import co.paralleluniverse.fibers.Suspendable
-import it.oraclize.cordapi.OraclizeUtils
-import net.corda.core.flows.FlowLogic
-import net.corda.core.flows.InitiatingFlow
-import net.corda.core.identity.Party
-import net.corda.core.utilities.unwrap
-
-@InitiatingFlow(version = 1)
-class OraclizeQueryStatusFlow (val queryId: String) : FlowLogic<Boolean>() {
-
-    @Suspendable
-    override fun call(): Boolean {
-        val oraclize = OraclizeUtils.getPartyNode(serviceHub)
-
-        val session = initiateFlow(oraclize)
-
-        val untrustedStatus = session.sendAndReceive<Boolean>(queryId)
-
-        return untrustedStatus.unwrap { status -> status }
+class ProofType {
+    companion object {
+        val NONE = 0x00
+        val TLSNOTARY = 0x10
+        val ANDROID = 0x20
+        val LEDGER = 0x30
+        val NATIVE = 0xF0
     }
+
 }
