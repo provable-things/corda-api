@@ -6,7 +6,7 @@
 [Documentation](https://docs.provable.xyz/)
 
 Gitter public support channel: 
-[![Join the chat at https://gitter.im/provable/corda-api](https://gitter.im/provable/corda-api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/provable/corda-api](https://gitter.im/provable/corda-api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)]
 
 ### Setup instructions
 
