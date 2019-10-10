@@ -28,35 +28,37 @@ if (!project.hasProperty('corda-integration')) { buildscript {
             classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
         }
     }
-}
 
-allprojects {
-    apply plugin: 'kotlin'
+    allprojects {
+        apply plugin: 'kotlin'
 
-    repositories {
-        mavenLocal()
-        jcenter()
-        mavenCentral()
-        maven { url 'https://software.r3.com/artifactory/corda' }
-        maven { url 'https://jitpack.io' }
-    }
+        repositories {
+            mavenLocal()
+            jcenter()
+            mavenCentral()
+            maven { url 'https://software.r3.com/artifactory/corda' }
+            maven { url 'https://jitpack.io' }
+        }
 
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-        kotlinOptions {
-            languageVersion = "1.2"
-            apiVersion = "1.2"
-            jvmTarget = "1.8"
-            javaParameters = true   // Useful for reflection.
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+            kotlinOptions {
+                languageVersion = "1.2"
+                apiVersion = "1.2"
+                jvmTarget = "1.8"
+                javaParameters = true   // Useful for reflection.
+            }
+        }
+
+        jar {
+            // This makes the JAR's SHA-256 hash repeatable.
+            preserveFileTimestamps = false
+            reproducibleFileOrder = true
+            baseName 'provable-corda-api'
         }
     }
 
-    jar {
-        // This makes the JAR's SHA-256 hash repeatable.
-        preserveFileTimestamps = false
-        reproducibleFileOrder = true
-        baseName 'provable-corda-api'
-    }
 }
+
 
 
 apply plugin: 'net.corda.plugins.cordapp'
