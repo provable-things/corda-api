@@ -46,6 +46,13 @@ repositories {
      maven { url 'https://jitpack.io' }
 }
 
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin/'
+    main.resources.srcDirs += "src/main/resources/"
+    test.java.srcDirs += 'src/test/kotlin/'
+    test.resources.srcDirs += "src/main/resources/"
+}
+
 apply plugin: 'kotlin'
 apply plugin: 'net.corda.plugins.cordapp'
 
@@ -86,8 +93,9 @@ def j2v8_dependency(architecture) {
     return j2v8_dep
 }
 
-import static org.apache.tools.ant.taskdefs.condition.Os.*
 
+
+import static org.apache.tools.ant.taskdefs.condition.Os.*
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
