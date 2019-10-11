@@ -53,7 +53,7 @@ class ProvableQueryFlow (val dataSource: String, val query: Any, val proofType: 
         progressTracker.currentStep = PROCESSING
         val session = initiateFlow(provable)
 
-        val query = Query(dataSource, query, delay, proofType)
+        val query = Query(dataSource, query, proofType, delay)
         val queryId = session.sendAndReceive<String>(query).unwrap { it }
 
         console("Query id: $queryId")
