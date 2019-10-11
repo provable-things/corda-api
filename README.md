@@ -1,17 +1,17 @@
 
-## Oraclize `corda-api`
+## Provable `corda-api`
 
 ### External references
 
 [Documentation](https://docs.provable.xyz/)
 
 Gitter public support channel: 
-[![Join the chat at https://gitter.im/provable/corda-api](https://gitter.im/provable/corda-api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/oraclize/corda-api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/oraclize/corda-api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ### Setup instructions
 
 ```bash
-git clone --recursive https://github.com/oraclize/corda-api.git
+git clone https://github.com/oraclize/corda-api.git
 cd corda-api
 ./setup
 ```
@@ -39,16 +39,20 @@ repositories {
 }
 
 dependencies {
-    compile "com.github.oraclize:corda-api:linux_x86_64-SNAPSHOT"
+    cordaCompile "com.github.provable-things:corda-api:linux_x86_64-SNAPSHOT"
 }
 ```
 
-**Note:** Choose a dependency from which architecture you are intended to use:
+And Enjoy!
 
-  * *Linux:* com.github.oraclize:corda-api:linux_x86_64-SNAPSHOT
-  * *Windows:* com.github.oraclize:corda-api:win32_x86_64-SNAPSHOT
-  * *macOS:* com.github.oraclize:corda-api:macosx_x86_64-SNAPSHOT
+**Note:** Choose a the right dependency depending from your operative system:
+
+| OS         | Dependency                                                  |
+|---|---|
+|**Linux**   | com.github.provable-things:corda-api:linux_x86_64-SNAPSHOT  |
+|**Windows** | com.github.provable-things:corda-api:win32_x86_64-SNAPSHOT  |
+|**macOS**   | com.github.provable-things:corda-api:macosx_x86_64-SNAPSHOT  |
+
  
- 
-Follow [this](https://github.com/gitmp01/corda-example) example to see how it works  
+Check out these [examples](https://github.com/provable-things/corda-examples) to see how it works.  
 
