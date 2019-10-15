@@ -81,3 +81,4 @@ docs/virtualenv/
 # These files are copied during export
 import
 update_branches
+signing.properties
