@@ -67,12 +67,6 @@ jar {
 cordapp {
     targetPlatformVersion corda_platform_version
     minimumPlatformVersion corda_platform_version
-    contract {
-        name "provable-corda-api"
-        vendor "Provable Things Ltd."
-        licence "MIT"
-        versionId 1
-    }
 
     // Save the signing properties provable_signer_pass into the signing.properties file
     // located a project root
