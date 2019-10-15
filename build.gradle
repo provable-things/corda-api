@@ -1,5 +1,4 @@
 buildscript {
-    println 'Running provable-corda-api buildscript'
     ext {
         corda_release_group = 'net.corda'
         corda_release_version = '4.1'
@@ -73,24 +72,36 @@ cordapp {
         licence "MIT"
         versionId 1
     }
-    if (System.hasProperty("provable-signer-pass")) {
+
+    // Save the signing properties provable_signer_pass into the signing.properties file
+    // located a project root
+    Properties signingProperties = new Properties()
+    try {
+        file(rootProject.file("./signing.properties")).withInputStream {
+            signingProperties.load(it)
+        }
+    } catch(ignored) {
+        println "signing.properties file not found"
+    }
+
+    if (signingProperties.provable_signer_pass != null) {
         signing {
             options {
                 alias "provable-signer"
-                storepass System.getProperty("provable-signer-pass")
-                keypass System.getProperty("provable-signer-pass")
-                keystore System.getProperty("provable-signer-keystore")
+                storepass signingProperties.provable_signer_pass
+                keypass signingProperties.provable_signer_pass
+                keystore rootProject.file(signingProperties.provable_signer_keystore).toString()
                 storetype "PKCS12"
             }
         }
     } else {
+        println "Signing with default keystore"
         signing {
             options {
                 enabled false
             }
         }
     }
-
 }
 
 // Function to compile the J2V8 dependency
